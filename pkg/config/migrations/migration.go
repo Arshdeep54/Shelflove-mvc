@@ -23,16 +23,6 @@ func main()  {
         fmt.Println("error checking database existence: %w", err)
 		return 
     }
-	cleandbFlag := os.Getenv("CLEANDB")
-    if cleandbFlag == "true" {
-        fmt.Println("Cleaning database...")
-        err := cleanDB(db)
-        if err != nil {
-            log.Fatal(err)
-        }
-        fmt.Println("Database cleaned successfully")
-        return
-    }
 	if !exists {
         _, err = config.Db.Exec("CREATE DATABASE shelflove;") 
         if err != nil {
@@ -43,6 +33,17 @@ func main()  {
     } else {
         fmt.Println("Database already exists")
     }
+	cleandbFlag := os.Getenv("CLEANDB")
+    if cleandbFlag == "true" {
+        fmt.Println("Cleaning database...")
+        err := cleanDB(db)
+        if err != nil {
+            log.Fatal(err)
+        }
+        fmt.Println("Database cleaned successfully")
+        return
+    }
+	
     if err := migrateTables(db); err != nil {
         log.Fatal(err)
     }
