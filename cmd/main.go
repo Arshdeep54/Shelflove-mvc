@@ -6,7 +6,9 @@ import (
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/api"
 )
 
-func main()  {
-	fmt.Println("hello wolrd ")
+func main() {
+
+	fmt.Println("Starting Server")
 	api.Start()
+
 }
