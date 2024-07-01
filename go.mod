@@ -2,7 +2,7 @@ module github.com/Arshdeep54/Shelflove-mvc
 
 go 1.22.1
 
-require github.com/gorilla/mux v1.8.1
+require golang.org/x/crypto v0.24.0
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect

@@ -1,4 +1,7 @@
-vendor
-target
-tmp
+/vendor
+/target
+/tmp/
+
 .env
+tmp/build-errors.log
+tmp/build-errors.log
