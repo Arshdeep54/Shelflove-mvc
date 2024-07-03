@@ -16,7 +16,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body>
-    {{ template "navbar" }}
+    {{ template "navbar" . }}
     <section class="m-5">
       <h1 class="text text-xl font-bold">All Available Books</h1>
       {{ if .Books }}

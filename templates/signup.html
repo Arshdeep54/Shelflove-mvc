@@ -100,7 +100,7 @@
                   required
                 />
               </div>
-              {{ if .ErrorMessage }}
+              {{ if len .ErrorMessage }}
               <div class="text text-red-500">{{ .ErrorMessage }}</div>
               {{ end }}
               <button

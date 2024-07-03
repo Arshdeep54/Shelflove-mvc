@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="sunset">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shelflove</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
+    <link type="text/css" href="/public/style.css" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    {{ template "navbar" . }}
+
+    <section>
+      <div class="mx-5 my-5">
+        <h1 class="text text-3xl m-5 font-bold">{{ .Book.Title }}</h1>
+        <p class="text text-2xl m-5 font-bold">By: {{ .Book.Author }}</p>
+        <div class="flex flex-col text-lg m-5 gap-5">
+          <p>
+            <span class="text-primary">Description:</span> {{ .Book.Description
+            }}
+          </p>
+          <p>
+            <span class="text-primary">Publication Date:</span> {{
+            .Book.PublicationDate }}
+          </p>
+          <p><span class="text-primary">Rating: </span>{{ .Book.Rating }}</p>
+          <p>
+            <span class="text-primary">Quantity:</span>
+            {{ with .Book.Quantity }} {{ if eq . 0 }}
+            <span class="text-accent">Not Available</span>
+            {{ else if eq . -1 }}
+            <span class="text-red-500">DELETED</span>
+            {{ else }} {{ . }} {{ end }} {{ end }}
+          </p>
+          <p><span class="text-primary">Genre:</span> {{ .Book.Genre }}</p>
+          <p><span class="text-primary">Address:</span> {{ .Book.Address }}</p>
+        </div>
+        <div class="flex flex-row gap-5 m-5">
+          {{ if .IsLoggedIn }} {{ if ne .IsAdmin true}} {{ if or .IssueRequested 
+          .IsIssued}} {{ if .issueRequested }}
+          <button type="submit" class="btn btn-secondary" disabled>
+            Issue Requested
+          </button>
+          {{ else }}
+          <button type="submit" class="btn btn-secondary" disabled>
+            Issued
+          </button>
+          {{end}}
+
+          <form action="/api/user/return/" method="post" id="requestForm">
+            <input
+              type="hidden"
+              id="bookid"
+              name="bookid"
+              value="{{ .Book.Id }}"
+            />
+            <input
+              type="hidden"
+              id="user_id"
+              name="user_id"
+              value="{{ .UserId }}"
+            />
+            {{ if .IsReturnRequested }}
+            <button type="submit" class="btn btn-secondary" disabled>
+              Return Requested
+            </button>
+            {{ else }} {{if .IssueRequested}}
+            <button type="submit" class="btn btn-secondary" disabled>
+              Return Request
+            </button>
+            {{else}}
+            <button type="submit" class="btn btn-secondary">
+              Return Request
+            </button>
+            {{end}} {{ end }}
+          </form>
+          {{else}}
+          <form
+            action="/api/user/issue/{{ .Book.Id }}"
+            method="post"
+            id="issueForm"
+          >
+            <input
+              type="hidden"
+              id="bookid"
+              name="bookid"
+              value="{{ .Book.Id }}"
+            />
+            <input
+              type="hidden"
+              id="user_id"
+              name="user_id"
+              value="{{ .UserId }}"
+            />
+            <button type="submit" class="btn btn-secondary">Issue Book</button>
+          </form>
+          {{end}} {{end}} {{ else }}
+          <p>Please log in to issue a book.</p>
+          {{ end }}
+        </div>
+      </div>
+    </section>
+
+    {{ if .IsAdmin }} {{ if gt .Book.Quantity 0}}
+    <div class="flex flex-row gap-5 m-5">
+      <button
+        class="btn btn-primary"
+        type="submit"
+        onclick="DeleteModal.showModal()"
+      >
+        Delete book
+      </button>
+      <button
+        class="btn btn-primary"
+        type="submit"
+        onclick="UpdateModal.showModal()"
+      >
+        Update book
+      </button>
+      <dialog id="DeleteModal" class="modal">
+        <form
+          action="/api/admin/deletebook/{{ .Book.Id }}"
+          method="post"
+          id="deletebookForm"
+        ></form>
+        <div class="modal-box">
+          <h3 class="font-bold text-lg">Delete Book</h3>
+          <p class="py-4">
+            Are you sure you want to Delete the book ({{ .Book.Title }})?
+          </p>
+          <form method="dialog">
+            <div class="flex flex-row-reverse">
+              <button class="btn mx-3" id="deletebook">Confirm</button>
+              <button class="btn mx-3">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </dialog>
+
+      <dialog id="UpdateModal" class="modal">
+        <div class="modal-box w-11/12 max-w-5xl">
+          <form method="dialog">
+            <button
+              class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            >
+              ✕
+            </button>
+          </form>
+          <h3 class="font-bold text-lg">Update book</h3>
+          <div class="divider divider-accent"></div>
+          <form
+            action="/api/admin/updatebook/{{ .Book.Id }}"
+            method="post"
+            id="updatebookForm"
+          >
+            <div class="flex flex-row w-full gap-16 align-center items-center">
+              <div>
+                <label class="text-xl" for="title">Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  value="{{ .Book.Title }}"
+                  class="input input-bordered w-full max-w-xs my-3 mx-3"
+                  placeholder="Enter book title"
+                />
+              </div>
+              <div>
+                <label class="text-xl" for="author">Author</label>
+                <input
+                  type="text"
+                  name="author"
+                  value="{{ .Book.Author }}"
+                  class="input input-bordered w-full max-w-xs my-3 mx-3"
+                  placeholder="Enter book Author"
+                />
+              </div>
+            </div>
+            <div class="flex flex-row w-full gap-16 align-center items-center">
+              <div class="flex flex-col">
+                <label class="text-xl mt-5" for="description"
+                  >Description</label
+                >
+                <textarea
+                  class="textarea textarea-bordered textarea-lg mx-3 resize-none max-w-xs border-solid outline-none rounded-xl my-3"
+                  name="description"
+                  placeholder="Enter the book description"
+                >
+    {{ .Book.Description }}</textarea
+                >
+              </div>
+              <div class="ml-8">
+                <label class="text-xl" for="publication_date"
+                  >Publication Date:</label
+                >
+                <input
+                  type="date"
+                  name="publication_date"
+                  class="input outline-none focus:outline-none my-3 mx-3"
+                  id="publication_date"
+                  value="{{ .Book.PublicationDate }}"
+                />
+              </div>
+            </div>
+            <div class="flex flex-row w-full gap-16 align-center items-center">
+              <div>
+                <label class="text-xl" for="quantity">Quantity</label>
+                <input
+                  type="number"
+                  name="quantity"
+                  value="{{ .Book.Quantity }}"
+                  class="input input-bordered w-full max-w-xs my-3 mx-3"
+                  placeholder="Enter how many books to enter"
+                />
+              </div>
+              <div>
+                <label class="text-xl" for="rating">Rating</label>
+                <input
+                  type="number"
+                  name="rating"
+                  value="{{ .Book.Rating }}"
+                  class="input input-bordered w-full max-w-xs my-3 mx-3"
+                  placeholder="Enter the rating of the book"
+                />
+              </div>
+            </div>
+            <div>
+              <div>
+                <label class="text-xl" for="address">Address</label>
+                <input
+                  type="text"
+                  name="address"
+                  value="{{ .Book.Address }}"
+                  class="input input-bordered w-full max-w-xs my-3 mx-3"
+                  placeholder="Enter book address"
+                />
+              </div>
+              <div>
+                <label class="text-xl" for="genre">Genre</label>
+                <select
+                  class="select select-bordered w-full max-w-xs"
+                  name="genre"
+                >
+                  <option selected>Fantasy</option>
+                  <option>Drama</option>
+                  <option>Comedy</option>
+                  <option>Physics</option>
+                  <option>Literature</option>
+                </select>
+              </div>
+            </div>
+          </form>
+
+          <div class="modal-action">
+            <form method="dialog">
+              <button
+                class="btn btn-primary addbook"
+                type="submit"
+                id="updatebook"
+              >
+                Update
+              </button>
+            </form>
+          </div>
+        </div>
+      </dialog>
+    </div>
+    {{ end }} {{ end }}
+
+    <script>
+      const deleteBookButton = document.getElementById("deletebook");
+      const deletebookForm = document.getElementById("deletebookForm");
+      deleteBookButton.addEventListener("click", () => {
+        deletebookForm.submit();
+      });
+    </script>
+    <script>
+      const today = new Date().toISOString().slice(0, 10);
+      document.getElementById("publication_date").value = today;
+      const updateBookButton = document.getElementById("updatebook");
+      const updatebookForm = document.getElementById("updatebookForm");
+
+      updateBookButton.addEventListener("click", () => {
+        updatebookForm.submit();
+      });
+    </script>
+  </body>
+</html>

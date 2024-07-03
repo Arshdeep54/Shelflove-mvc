@@ -5,7 +5,7 @@
         Shelf<span class="text-red-500">love</span>
       </a>
       <div class="flex items-center md:order-2 gap-4">
-        {{ with .IsLoggedIn }}
+        {{ if .IsLoggedIn }}
         <div class="flex flex-row w-max align-center">
           {{ if .IsAdmin }}
           <a href="/admin" class="mx-4">

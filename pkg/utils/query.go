@@ -35,7 +35,7 @@ const (
 			issueRequested BOOLEAN DEFAULT FALSE,
 			fine FLOAT DEFAULT 0, 
 			FOREIGN KEY (user_id) REFERENCES user(id), 
-			FOREIGN KEY (bookid) REFERENCES book(id)
+			FOREIGN KEY (book_id) REFERENCES book(id)
 			);`
     Add_Dummy_Books=`
 			INSERT INTO book (title, author, publication_date, quantity, genre, description, rating, address)
