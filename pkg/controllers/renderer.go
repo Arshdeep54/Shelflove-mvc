@@ -21,6 +21,7 @@ var Data = types.RenderData{
 	IssueRequested:    false,
 	IsIssued:          false,
 	IsReturnRequested: false,
+	AdminRequested:    false,
 	Username:          "",
 	Email:             "",
 }
@@ -63,8 +64,18 @@ func Book(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err.Error())
 	}
 }
-func UserDashboard(w http.ResponseWriter, r *http.Request) {
 
+func UserDashboard(w http.ResponseWriter, r *http.Request) {
+		t := views.UserDashboardPage()
+	userIssues, err := models.GetUserIssues(Data.UserId)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+	Data.RequestedIssues=userIssues
+	err = t.Execute(w, Data)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
 }
 func AdminDashboard(w http.ResponseWriter, r *http.Request) {
 	if Data.IsAdmin {

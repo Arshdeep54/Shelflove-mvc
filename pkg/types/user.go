@@ -40,7 +40,13 @@ type RenderData struct {
 	IsReturnRequested bool
 	Username          string
 	Email             string
-	RequestedReturns   []IssueWithDetails
+	RequestedReturns  []IssueWithDetails
 	RequestedIssues   []IssueWithDetails
 	RequestedAdmins   []AdminRequest
+	AdminRequested    bool
+}
+
+type RequestPayload struct {
+	IssueIds      []string       `json:"issueIds"`
+	SelectedBooks map[string]int `json:"selectedBooks"`
 }

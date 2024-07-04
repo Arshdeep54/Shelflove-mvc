@@ -17,7 +17,7 @@ func Start() {
 	http.HandleFunc("/books/{id}", middlewares.Authenticate(middlewares.ExistingIssue(controllers.Book)))
 	http.HandleFunc("/login", middlewares.Authenticate(controllers.LoginPage))
 	http.HandleFunc("/signup", middlewares.Authenticate(controllers.SignUpPage))
-	http.HandleFunc("/user", middlewares.Authenticate(controllers.UserDashboard))
+	http.HandleFunc("/user", middlewares.Authenticate(middlewares.AdminRequestSent(controllers.UserDashboard)))
 	http.HandleFunc("/admin", middlewares.Authenticate(controllers.AdminDashboard))
 	http.HandleFunc("/error", controllers.Error)
 
@@ -29,21 +29,19 @@ func Start() {
 	http.HandleFunc("/api/auth/logout", controllers.Logout)
 
 	//user
-	http.HandleFunc("/api/user/issue/:bookid", controllers.IssueBook)
-	http.HandleFunc("/api/user/return", controllers.ReturnBook)
-	http.HandleFunc("/api/user/books", controllers.UserBooks)
-	http.HandleFunc("/api/user/adminrequest", controllers.AdminRequest)
+	http.HandleFunc("/api/user/issue/{bookid}", middlewares.Authenticate(middlewares.BookAvailable(controllers.IssueBook)))
+	http.HandleFunc("/api/user/return/", middlewares.Authenticate(controllers.ReturnBook))
+	http.HandleFunc("/api/user/adminrequest/", middlewares.Authenticate(controllers.AdminRequest))
 
 	//admin
 	http.HandleFunc("/api/admin/addbook/", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.AddBook)))
-	http.HandleFunc("/api/admin/updatebook/{id}", middlewares.OnlyAdmin(controllers.UpdateBook))
-	http.HandleFunc("/api/admin/deletebook/{bookId}", middlewares.Authenticate(middlewares.OnlyAdmin(middlewares.BookIsued(controllers.DeleteBook))))
-	http.HandleFunc("/api/admin/bookissues", middlewares.OnlyAdmin(controllers.IssuedBooks))
-	http.HandleFunc("/api/admin/approveissues", middlewares.OnlyAdmin(controllers.ApproveIssues))
-	http.HandleFunc("/api/admin/denyIssue/{id}", middlewares.OnlyAdmin(controllers.DenyIssues))
-	http.HandleFunc("/api/admin/approvereturns", middlewares.OnlyAdmin(controllers.ApproveReturns))
-	http.HandleFunc("/api/admin/approveadmin", middlewares.OnlyAdmin(controllers.ApproveAdmin))
-	http.HandleFunc("/api/admin/denyadmin/{id}", middlewares.OnlyAdmin(controllers.DenyAdmin))
+	http.HandleFunc("/api/admin/updatebook/{id}", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.UpdateBook)))
+	http.HandleFunc("/api/admin/deletebook/{bookId}", middlewares.Authenticate(middlewares.OnlyAdmin(middlewares.BookIssued(controllers.DeleteBook))))
+	http.HandleFunc("/api/admin/approveissues/", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.ApproveIssues)))
+	http.HandleFunc("/api/admin/denyIssue/{id}", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.DenyIssues)))
+	http.HandleFunc("/api/admin/approvereturns", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.ApproveReturns)))
+	http.HandleFunc("/api/admin/approveadmin", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.ApproveAdmin)))
+	http.HandleFunc("/api/admin/denyadmin/{id}", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.DenyAdmin)))
 
 	err := http.ListenAndServe(":3000", nil)
 	if err != nil {

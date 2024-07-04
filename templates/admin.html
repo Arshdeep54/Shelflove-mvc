@@ -21,7 +21,7 @@
         {{ .Username }} ( {{ .Email }} )
       </h2>
       {{ if gt (len .RequestedReturns) 0 }}
-          <div class="flex flex-row justify-between">
+      <div class="flex flex-row justify-between">
         <h3 class="text text-slate-400 text-2xl">Requested returns</h3>
         <button class="btn btn-accent approve-btn">Approve Selected</button>
       </div>
@@ -38,7 +38,7 @@
           </tr>
         </thead>
         <tbody>
-          {{ range .RequestedReturns  }}
+          {{ range .RequestedReturns }}
           <tr>
             <td>{{ .Issue.Id }}</td>
             <td class="flex flex-row gap-2">
@@ -73,15 +73,9 @@
                 </svg>
               </a>
             </td>
-            <td>
-              {{ .Book.Author }} 
-            </td>
-            <td>
-              {{ .Issue.Issue_date }}
-            </td>
-            <td>
-              {{ .Issue.Returned_date }}
-            </td>
+            <td>{{ .Book.Author }}</td>
+            <td>{{ .Issue.Issue_date }}</td>
+            <td>{{ .Issue.Returned_date }}</td>
             <td>{{ .Issue.ReturnRequested }}</td>
             <td>
               <input
@@ -97,10 +91,9 @@
           {{ end }}
         </tbody>
       </table>
-      {{ else  }}
+      {{ else }}
       <p>No new Requests</p>
-      {{ end }} 
-      {{ if gt (len .RequestedIssues) 0 }}
+      {{ end }} {{ if gt (len .RequestedIssues) 0 }}
 
       <div class="divider"></div>
       <div class="flex flex-row justify-between">
@@ -122,8 +115,8 @@
           </tr>
         </thead>
         <tbody>
-            {{ range .RequestedIssues  }}
-            
+          {{ range .RequestedIssues }}
+
           <tr>
             <td>{{ .Issue.Id }}</td>
             <td>{{ .Username }}</td>
@@ -174,10 +167,7 @@
               />
             </td>
             <td>
-              <form
-                action="/api/admin/denyIssue/{{ .Issue.Id}}"
-                method="post"
-              >
+              <form action="/api/admin/denyIssue/{{ .Issue.Id}}" method="post">
                 <button class="btn btn-secondary" type="submit">Deny</button>
               </form>
             </td>
@@ -208,7 +198,7 @@
             </tr>
           </thead>
           <tbody>
-            {{ range .RequestedAdmins  }}
+            {{ range .RequestedAdmins }}
             <tr>
               <td>{{ .Id }}</td>
 
@@ -224,10 +214,7 @@
                 />
               </td>
               <td>
-                <form
-                  action="/api/admin/denyAdmin/{{ .Id}}"
-                  method="post"
-                >
+                <form action="/api/admin/denyAdmin/{{ .Id}}" method="post">
                   <button class="btn btn-secondary" type="submit">Deny</button>
                 </form>
               </td>
@@ -355,7 +342,7 @@
         </div>
       </div>
     </dialog>
-      {{ if gt (len .RequestedReturns) 0 }}
+    {{ if gt (len .RequestedReturns) 0 }}
     <script>
       const returnCheckboxes = document.querySelectorAll(".return-checkbox");
       const selectedIssueIds = [];
@@ -393,22 +380,21 @@
 
         const requestBody = JSON.stringify({
           issueIds: selectedIssueIds,
-          selectedReturnbooks,
+          selectedBooks: selectedReturnbooks,
         });
-
-        fetch("/api/admin/approve", {
+        console.log(requestBody);
+        fetch("/api/admin/approvereturns", {
           method: "POST",
           body: requestBody,
           headers: { "Content-Type": "application/json" },
         }).then((response) => {
           selectedIssueIds.length = 0;
           selectedReturnbooks = {};
-          location.reload();
+          // location.reload();
         });
       });
     </script>
-    {{ end}}
-      {{ if gt (len .RequestedIssues) 0 }}
+    {{ end}} {{ if gt (len .RequestedIssues) 0 }}
     <script>
       const issueCheckboxes = document.querySelectorAll(".issue-checkbox");
       const selectedIssueReqIds = [];
@@ -417,13 +403,16 @@
       issueCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener("change", (event) => {
           if (event.target.checked) {
+            console.log("checked");
             let bookQuantity = event.target.dataset.bookQuantity;
             if (
               !selectedIssuebooks[event.target.dataset.bookId] &&
               bookQuantity > 0
             ) {
+              console.log("can issue");
               selectedIssueReqIds.push(event.target.dataset.issueId);
               selectedIssuebooks[event.target.dataset.bookId] = 1;
+              console.log(selectedIssueReqIds, selectedIssuebooks);
             } else {
               if (
                 bookQuantity > selectedIssuebooks[event.target.dataset.bookId]
@@ -454,12 +443,12 @@
           alert("Please select at least one checkbox");
           return;
         }
-
         const requestBody = JSON.stringify({
           issueIds: selectedIssueReqIds,
-          selectedIssuebooks,
+          selectedBooks: selectedIssuebooks,
         });
 
+        console.log(requestBody);
         fetch("/api/admin/approveissues/", {
           method: "POST",
           body: requestBody,
@@ -467,12 +456,11 @@
         }).then((response) => {
           selectedIssueReqIds.length = 0;
           selectedIssuebooks = {};
-          location.reload();
+          // location.reload();
         });
       });
     </script>
-    {{end}} 
-      {{ if gt (len .RequestedAdmins) 0 }}
+    {{end}} {{ if gt (len .RequestedAdmins) 0 }}
     <script>
       const adminCheckboxes = document.querySelectorAll(".admin-checkbox");
       const selectedUserIds = [];

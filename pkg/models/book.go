@@ -1,8 +1,10 @@
 package models
 
 import (
+	"database/sql"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/config"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/types"
@@ -46,8 +48,11 @@ func GetBook(bookId string) (*types.Book, error) {
 	query := `SELECT * FROM book WHERE id = ? `
 	row := db.QueryRow(query, id)
 	var book types.Book
-	err = row.Scan(&book.Id, &book.Title, &book.Author, &book.PublicationDate, &book.Quantity, &book.Genre, &book.Address, &book.Rating, &book.Description)
+	err = row.Scan(&book.Id, &book.Title, &book.Author, &book.PublicationDate, &book.Quantity, &book.Genre, &book.Description, &book.Rating, &book.Address)
 	if err != nil {
+		if err.Error() == sql.ErrNoRows.Error() {
+			fmt.Print("looo")
+		}
 		return nil, err
 	}
 	return &book, nil
@@ -66,6 +71,35 @@ func AddNewBook(book *types.Book) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+func Updatebook(book *types.Book, id int) error {
+	query := `UPDATE book
+        SET title = COALESCE(?, title),
+            author = COALESCE(?, author),
+            description = COALESCE(?, description),
+            quantity = COALESCE(?, quantity),
+            publication_date = COALESCE(?, publication_date),
+            rating = COALESCE(?, rating),
+            genre = COALESCE(?, genre),
+            address = COALESCE(?, address)
+        WHERE id = ?;`
+	db, err := config.DbConnection()
+	if err != nil {
+		return fmt.Errorf("error connecting to Db: %w", err)
+	}
+	result, err := db.Exec(query, book.Title, book.Author, book.Description, book.Quantity, book.PublicationDate, book.Rating, book.Genre, book.Address, id)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("book Not Found")
+	}
+
 	return nil
 }
 func DeleteBook(id int64) error {
@@ -87,21 +121,79 @@ func DeleteBook(id int64) error {
 	}
 	return nil
 }
-func BookCount(id int64) (int, error) {
+func IssuedBookCount(id int64) (int, error) {
 	db, err := config.DbConnection()
 	if err != nil {
 		return 0, fmt.Errorf("error connecting to Db: %w", err)
 	}
 	query := `
-    SELECT Count(bookid)
+    SELECT Count(book_id)
     FROM issue
-    WHERE bookid = ? and isReturned=false and issueRequested=false
+    WHERE book_id = ? and isReturned=false and issueRequested=false
   `
 	row := db.QueryRow(query, id)
 	var count int
-	err=row.Scan(&count)
-	if err!=nil{
+	err = row.Scan(&count)
+	if err != nil {
 		return 0, fmt.Errorf("error scaning: %w", err)
 	}
 	return count, nil
+}
+func BookCount(id int64) (int, error) {
+	db, err := config.DbConnection()
+	if err != nil {
+		return 0, fmt.Errorf("error connecting to Db: %w", err)
+	}
+	query := ` SELECT id, quantity
+        FROM book
+        WHERE id = ?
+      `
+	row := db.QueryRow(query, id)
+	var userid, count int
+	err = row.Scan(&userid, &count)
+	if err != nil {
+		return 0, fmt.Errorf("error scaning: %w", err)
+	}
+	return count, nil
+}
+func UpdatebooksQuantity(payload *types.RequestPayload, increase bool) error {
+	var sign string
+	if increase {
+		sign = "+"
+	} else {
+		sign = "-"
+	}
+	query := `UPDATE book SET quantity= (CASE `
+	for key, value := range payload.SelectedBooks {
+		query += fmt.Sprintf(" WHEN id= %s THEN quantity %s %d", key, sign, value)
+	}
+	var keyString string
+	for key := range payload.SelectedBooks {
+		keyString += key
+		keyString += ","
+	}
+	keyString = strings.Trim(keyString, ",")
+	query += fmt.Sprintf(` ELSE (quantity) END ) WHERE id IN (%s)`, keyString)
+
+	db, err := config.DbConnection()
+	if err != nil {
+		return fmt.Errorf("error connecting to Db: %w", err)
+	}
+
+	result, err := db.Exec(query)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	println(rowsAffected)
+	if rowsAffected == 0 {
+		fmt.Println("no updation")
+		return fmt.Errorf("no Updation")
+	}
+	fmt.Println(query)
+	return nil
+
 }

@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/controllers"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/models"
@@ -11,15 +10,7 @@ import (
 func ExistingIssue(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		bookId := r.PathValue("id")
-		userId, err := strconv.ParseInt(w.Header().Get("userId"), 10, 64)
-		if err != nil {
-			controllers.Data.IsIssued = false
-			controllers.Data.IssueRequested = false
-			controllers.Data.IsReturnRequested = false
-			next(w, r)
-			return
-		}
-		issue, err := models.GetIssue(bookId, int(userId))
+		issue, err := models.GetIssue(bookId, controllers.Data.UserId)
 		if err != nil {
 			controllers.Data.IsIssued = false
 			controllers.Data.IssueRequested = false

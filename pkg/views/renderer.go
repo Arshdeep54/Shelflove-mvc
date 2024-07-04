@@ -31,6 +31,12 @@ func AdminPage() *template.Template {
 	return temp
 }
 
+func UserDashboardPage() *template.Template {
+	temp := template.Must(template.ParseFiles("templates/user.html", "templates/navbar.html"))
+	return temp
+}
+
+
 func ErrorPage() *template.Template {
 	temp := template.Must(template.ParseFiles("templates/error.html"))
 	return temp

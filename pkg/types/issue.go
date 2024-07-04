@@ -18,5 +18,6 @@ type Issue struct {
 type IssueWithDetails struct {
 	Issue    Issue
 	Book     Book
+	IsIssued bool
 	Username string
 }

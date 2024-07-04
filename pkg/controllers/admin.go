@@ -1,46 +1,27 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/models"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/types"
+	"github.com/Arshdeep54/Shelflove-mvc/pkg/utils"
 )
 
 func AddBook(w http.ResponseWriter, r *http.Request) {
-	fmt.Print("sf")
 	err := r.ParseForm()
 	if err != nil {
 		fmt.Print("error parsing the form", err)
 	}
+
 	var book types.Book
-	var layout = "2006-01-02"
-	parsedDate, err := time.Parse(layout, r.FormValue("publication_date"))
+	err = utils.ParseBook(&book, r)
 	if err != nil {
-		fmt.Println("Error parsing publication date:", err)
-		return
+		fmt.Print("error parsing the book", err)
 	}
-	book.Title = r.FormValue("title")
-	book.Author = r.FormValue("author")
-	book.Description = r.FormValue("description")
-	book.PublicationDate = &parsedDate
-	book.Genre = r.FormValue("genre")
-	rating, err := strconv.ParseFloat(r.FormValue("rating"), 64)
-	if err != nil {
-		fmt.Println("Error parsing float:", err)
-		return
-	}
-	book.Rating = float32(rating)
-	quantity, err := strconv.ParseInt(r.FormValue("quantity"), 10, 64)
-	if err != nil {
-		fmt.Println("Error parsing float:", err)
-		return
-	}
-	book.Quantity = int32(quantity)
-	book.Address = r.FormValue("address")
 	if book.Title == "" || book.Address == " " || book.Description == "" || book.Quantity == 0 || book.PublicationDate == nil || book.Rating == 0 || book.Address == "" || book.Genre == "" {
 		ErrorData.Message = "Empty fields"
 		http.Redirect(w, r, "/error", http.StatusSeeOther)
@@ -54,9 +35,27 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(book)
 	http.Redirect(w, r, "/admin", http.StatusSeeOther)
 }
+
 func UpdateBook(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome from the main controller!")
+	bookId := r.PathValue("id")
+	id, err := strconv.ParseInt(bookId, 10, 64)
+	if err != nil {
+		fmt.Println("Error parsing to int")
+		return
+	}
+	var book types.Book
+	err = utils.ParseBook(&book, r)
+	if err != nil {
+		fmt.Print("error parsing the book", err)
+	}
+	err = models.Updatebook(&book, int(id))
+	if err != nil {
+		fmt.Print("error updating the book", err)
+
+	}
+	http.Redirect(w, r, fmt.Sprintf("/books/%d", id), http.StatusSeeOther)
 }
+
 func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	bookId := r.PathValue("bookId")
 	id, err := strconv.ParseInt(bookId, 10, 64)
@@ -66,22 +65,70 @@ func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	}
 	err = models.DeleteBook(id)
 	if err != nil {
-		fmt.Println("Error parsing to int",err)
+		fmt.Println("Error parsing to int", err)
 		return
 	}
 	http.Redirect(w, r, "/books", http.StatusSeeOther)
 }
-func IssuedBooks(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome from the main controller!")
-}
+
 func ApproveIssues(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome from the main controller!")
+
+	var payload types.RequestPayload
+	err := json.NewDecoder(r.Body).Decode(&payload)
+	if err != nil {
+		fmt.Println("Erro:", err)
+	}
+
+	if payload.IssueIds == nil || len(payload.IssueIds) == 0 {
+		http.Error(w, "Invalid request body: missing or invalid issue IDs", http.StatusBadRequest)
+		return
+	}
+	fmt.Println(payload.IssueIds)
+	err = models.UpdatebooksQuantity(&payload, false)
+	if err != nil {
+		fmt.Println("Error updating quantity:", err)
+	}
+	err = models.UpdateIssue(payload.IssueIds, utils.ISSUED)
+	if err != nil {
+		fmt.Println("Error updating issues:", err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(map[string]string{"message": "successfully approved"})
+	if err != nil {
+		http.Error(w, "Error encoding response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 func DenyIssues(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome from the main controller!")
 }
 func ApproveReturns(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome from the main controller!")
+	var payload types.RequestPayload
+	err := json.NewDecoder(r.Body).Decode(&payload)
+	if err != nil {
+		fmt.Println("Erro:", err)
+	}
+	issueIds := payload.IssueIds
+	if payload.IssueIds == nil || len(payload.IssueIds) == 0 {
+		http.Error(w, "Invalid request body: missing or invalid issue IDs", http.StatusBadRequest)
+		return
+	}
+	err = models.UpdatebooksQuantity(&payload, true)
+	if err != nil {
+		fmt.Println("Error updating quantity:", err)
+	}
+	err = models.UpdateIssue(issueIds, utils.RETURNED)
+	if err != nil {
+		fmt.Println("Error updating issues:", err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(map[string]string{"message": "successfully approved"})
+	if err != nil {
+		http.Error(w, "Error encoding response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 func ApproveAdmin(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome from the main controller!")
