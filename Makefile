@@ -11,7 +11,6 @@ GO_PACKAGES := $(shell go list ./... | grep -v vendor)
 MIGRATE_PATH=./pkg/config/migrations/migration.go
 BUILD_OUTPUT := ./target/shelflove
 BUILD_INPUT := cmd/main.go
-UNAME := $(shell uname)
 TEST_FOLDER:=./pkg/tests
 
 help:
@@ -24,6 +23,7 @@ help:
 	@echo "  dev      - Start development server"
 	@echo "  lint     - Run code linters "
 	@echo "  test     - Run unit tests " 
+	@echo "  host     - Host on Apache Server " 
 
 all: install migrate dev
 migrate:
@@ -39,6 +39,10 @@ test:
 	@echo "Testing"
 	@go test ${TEST_FOLDER} -v
 	
+host:
+	@echo "Hosting on apache server"
+	@chmod +x ./host.sh
+	@./host.sh
 install:
 	@echo "Installing dependencies..."
 	@$(GO) mod download

@@ -45,7 +45,7 @@ func Start() {
 	http.HandleFunc("/api/admin/approveadmin/", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.ApproveAdmin)))
 	http.HandleFunc("/api/admin/denyadmin/{id}", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.DenyAdmin)))
 
-	err := http.ListenAndServe(":3000", nil)
+	err := http.ListenAndServe(":8000", nil)
 	if err != nil {
 		fmt.Printf("Error Starting the sever ...")
 	}

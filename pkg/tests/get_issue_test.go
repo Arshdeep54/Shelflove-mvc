@@ -7,8 +7,8 @@ import (
 
 	"testing"
 
+	"github.com/Arshdeep54/Shelflove-mvc/pkg/config"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/models"
-	"github.com/joho/godotenv"
 )
 
 type PayloadData struct {
@@ -31,10 +31,8 @@ var payloads = []PayloadData{
 }
 
 func TestGetIssue(t *testing.T) {
-	err := godotenv.Load("../../.env")
-	if err != nil {
-		t.Fatal("Error loading env", err)
-	}
+	
+	config.DbPath = true
 	for _, value := range payloads {
 		_, err := models.GetIssue(value.bookId, value.userId)
 		if err != nil {
