@@ -13,7 +13,7 @@ import (
 var Db *sql.DB
 
 func DbConnection() (*sql.DB, error) {
-	err := godotenv.Load()
+	err := godotenv.Load("../../.env")
 	if err != nil {
 		return nil, fmt.Errorf("error loading .env file: %w", err)
 	}
@@ -37,6 +37,5 @@ func DbConnection() (*sql.DB, error) {
 		return nil, fmt.Errorf("error pinging database: %w", err)
 	}
 
-	fmt.Println("Database connection established successfully")
 	return Db, nil
 }

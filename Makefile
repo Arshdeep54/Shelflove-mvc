@@ -12,7 +12,7 @@ MIGRATE_PATH=./pkg/config/migrations/migration.go
 BUILD_OUTPUT := ./target/shelflove
 BUILD_INPUT := cmd/main.go
 UNAME := $(shell uname)
-
+TEST_FOLDER:=./pkg/tests
 
 help:
 	@echo "Available targets:"
@@ -36,7 +36,8 @@ lint:
 	@$(GOLANGCI_LINT) run
 	
 test:
-	@echo "tests yet to be created"
+	@echo "Testing"
+	@go test ${TEST_FOLDER} -v
 	
 install:
 	@echo "Installing dependencies..."

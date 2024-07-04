@@ -23,7 +23,6 @@ func GetAllBooks() ([]types.Book, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var book types.Book
-		// Scan each column of the current row into the Book struct fields
 		err := rows.Scan(&book.Id, &book.Title, &book.Author, &book.PublicationDate, &book.Quantity, &book.Genre, &book.Address, &book.Rating, &book.Description)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning book data: %w", err)

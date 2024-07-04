@@ -14,7 +14,7 @@ import (
 func GetIssue(bookId string, userId int) (*types.Issue, error) {
 	id, err := strconv.ParseInt(bookId, 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, strconv.ErrSyntax
 	}
 	db, err := config.DbConnection()
 	if err != nil {
