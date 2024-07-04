@@ -86,6 +86,11 @@
                 data-book-id="{{ .Book.Id }}"
               />
             </td>
+            <td>
+              <form action="/api/admin/denyreturn/{{ .Issue.Id}}" method="post">
+                <button class="btn btn-secondary" type="submit">Deny</button>
+              </form>
+            </td>
           </tr>
 
           {{ end }}
@@ -167,7 +172,7 @@
               />
             </td>
             <td>
-              <form action="/api/admin/denyIssue/{{ .Issue.Id}}" method="post">
+              <form action="/api/admin/denyissue/{{ .Issue.Id}}" method="post">
                 <button class="btn btn-secondary" type="submit">Deny</button>
               </form>
             </td>
@@ -214,7 +219,7 @@
                 />
               </td>
               <td>
-                <form action="/api/admin/denyAdmin/{{ .Id}}" method="post">
+                <form action="/api/admin/denyadmin/{{ .Id}}" method="post">
                   <button class="btn btn-secondary" type="submit">Deny</button>
                 </form>
               </td>
@@ -487,17 +492,16 @@
           return;
         }
 
-        const requestBody = JSON.stringify({ userIds: selectedUserIds });
+        const requestBody = JSON.stringify({ ids: selectedUserIds });
+        console.log(requestBody);
 
         fetch("/api/admin/approveadmin/", {
-          method: "POST",
+          method:"POST",
           body: requestBody,
           headers: { "Content-Type": "application/json" },
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            selectedUserIds.length = 0;
-          });
+        }).then((response) => {
+          selectedUserIds.length = 0;
+        });
       });
     </script>
     {{ end }}

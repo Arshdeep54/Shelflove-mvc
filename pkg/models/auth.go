@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/config"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/types"
@@ -87,4 +88,50 @@ func AdminRequestSent(userId int) (bool, error) {
 		return false, err
 	}
 	return request, nil
+}
+
+func ApproveAdmin(userIds []string) error {
+	var keyString string
+	for _, key := range userIds {
+		keyString += key
+		keyString += ","
+	}
+	keyString = strings.Trim(keyString, ",")
+	query := fmt.Sprintf(`UPDATE user SET adminRequest = FALSE, isAdmin = TRUE WHERE id IN (%s)`, keyString)
+	db, err := config.DbConnection()
+	if err != nil {
+		return err
+	}
+	result, err := db.Exec(query)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("error Updating")
+	}
+	return nil
+}
+func DenyAdminRequest(userId int) error {
+	query := `UPDATE user SET adminRequest= false WHERE id= ?`
+	db, err := config.DbConnection()
+	if err != nil {
+		return err
+	}
+	result, err := db.Exec(query, userId)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("error Updating")
+	}
+
+	return nil
 }

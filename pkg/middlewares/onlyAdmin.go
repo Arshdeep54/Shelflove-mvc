@@ -8,10 +8,8 @@ import (
 
 func OnlyAdmin(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		if controllers.Data.IsAdmin && r.Method == http.MethodPost {
 			next(w, r)
-
 			return
 		} else {
 			controllers.ErrorData.Message = "You are not the admin "

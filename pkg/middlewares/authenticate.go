@@ -48,6 +48,5 @@ func writeHeaders(w http.ResponseWriter, r *http.Request, next http.HandlerFunc,
 	controllers.Data.Username = username
 	controllers.Data.Email = email
 	controllers.Data.UserId = userId
-
 	next(w, r)
 }

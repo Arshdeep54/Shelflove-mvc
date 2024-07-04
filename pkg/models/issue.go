@@ -216,3 +216,30 @@ func UpdateIssue(issueIds []string, updateType string) error {
 	}
 	return nil
 }
+
+func DenyIssueRequest(id int, denyType string) error {
+	var query string
+	if denyType == utils.ISSUED {
+		query = `DELETE FROM issue WHERE id= ?`
+	} else if denyType == utils.RETURNED {
+		query = ` UPDATE issue SET returnRequested = FALSE WHERE id = ?;`
+	}
+	db, err := config.DbConnection()
+	if err != nil {
+		return fmt.Errorf("error connecting to Db: %w", err)
+	}
+	result, err := db.Exec(query,id)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		fmt.Println("no updation")
+		return fmt.Errorf("no Updation")
+	}
+	return nil
+
+}

@@ -101,7 +101,33 @@ func ApproveIssues(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func DenyIssues(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome from the main controller!")
+	issueId := r.PathValue("id")
+	id, err := strconv.ParseInt(issueId, 10, 64)
+	if err != nil {
+		fmt.Println("Error parsing to int")
+		return
+	}
+	err = models.DenyIssueRequest(int(id), utils.ISSUED)
+	if err != nil {
+		fmt.Println("Error Denying Request:", err)
+	}
+	http.Redirect(w, r, "/admin", http.StatusSeeOther)
+
+}
+func DenyReturn(w http.ResponseWriter, r *http.Request) {
+	issueId := r.PathValue("id")
+	id, err := strconv.ParseInt(issueId, 10, 64)
+	if err != nil {
+		fmt.Println("Error parsing to int")
+		return
+	}
+	err = models.DenyIssueRequest(int(id), utils.RETURNED)
+	if err != nil {
+		fmt.Println("Error Denying Request:", err)
+		return
+	}
+	http.Redirect(w, r, "/admin", http.StatusSeeOther)
+
 }
 func ApproveReturns(w http.ResponseWriter, r *http.Request) {
 	var payload types.RequestPayload
@@ -131,8 +157,36 @@ func ApproveReturns(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func ApproveAdmin(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome from the main controller!")
+	type adminrequest struct {
+		Ids []string
+	}
+	var request adminrequest
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		fmt.Println("Erro:", err)
+	}
+	fmt.Println(request.Ids)
+	if request.Ids == nil || len(request.Ids) == 0 {
+		http.Error(w, "Invalid request body: missing or invalid  IDs", http.StatusBadRequest)
+		return
+	}
+
+	err = models.ApproveAdmin(request.Ids)
+	if err != nil {
+		fmt.Println("Error approve admin:", err)
+	}
+
 }
 func DenyAdmin(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome from the main controller!")
+	userId := r.PathValue("id")
+	id, err := strconv.ParseInt(userId, 10, 64)
+	if err != nil {
+		fmt.Println("Error parsing to int")
+		return
+	}
+	err = models.DenyAdminRequest(int(id))
+	if err != nil {
+		fmt.Println("Error Denying Request:", err)
+	}
+	http.Redirect(w, r, "/admin", http.StatusSeeOther)
 }

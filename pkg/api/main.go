@@ -38,9 +38,11 @@ func Start() {
 	http.HandleFunc("/api/admin/updatebook/{id}", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.UpdateBook)))
 	http.HandleFunc("/api/admin/deletebook/{bookId}", middlewares.Authenticate(middlewares.OnlyAdmin(middlewares.BookIssued(controllers.DeleteBook))))
 	http.HandleFunc("/api/admin/approveissues/", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.ApproveIssues)))
-	http.HandleFunc("/api/admin/denyIssue/{id}", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.DenyIssues)))
+	http.HandleFunc("/api/admin/denyissue/{id}", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.DenyIssues)))
 	http.HandleFunc("/api/admin/approvereturns", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.ApproveReturns)))
-	http.HandleFunc("/api/admin/approveadmin", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.ApproveAdmin)))
+	http.HandleFunc("/api/admin/denyreturn/{id}", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.DenyReturn)))
+
+	http.HandleFunc("/api/admin/approveadmin/", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.ApproveAdmin)))
 	http.HandleFunc("/api/admin/denyadmin/{id}", middlewares.Authenticate(middlewares.OnlyAdmin(controllers.DenyAdmin)))
 
 	err := http.ListenAndServe(":3000", nil)
