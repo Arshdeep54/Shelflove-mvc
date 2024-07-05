@@ -9,7 +9,7 @@ AIR := $(GOPATH_BIN)/air
 GOLANGCI_LINT := ./bin/golangci-lint
 GO_PACKAGES := $(shell go list ./... | grep -v vendor)
 MIGRATE_PATH=./pkg/config/migrations/migration.go
-BUILD_OUTPUT := ./target/shelflove
+BUILD_OUTPUT := shelflove
 BUILD_INPUT := cmd/main.go
 TEST_FOLDER:=./pkg/tests
 

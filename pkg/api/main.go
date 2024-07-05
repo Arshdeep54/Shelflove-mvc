@@ -10,7 +10,6 @@ import (
 )
 
 func Start() {
-	// r:= mux.NewRouter()
 	//render Routes
 	http.HandleFunc("/", middlewares.Authenticate(controllers.Home))
 	http.HandleFunc("/books", middlewares.Authenticate(controllers.Books))
@@ -47,6 +46,6 @@ func Start() {
 
 	err := http.ListenAndServe(":8000", nil)
 	if err != nil {
-		fmt.Printf("Error Starting the sever ...")
+		fmt.Println("Error Starting the sever ...",err)
 	}
 }
