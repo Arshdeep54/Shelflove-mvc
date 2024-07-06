@@ -8,7 +8,7 @@ GOPATH_BIN := $(GOPATH)/bin
 AIR := $(GOPATH_BIN)/air
 GOLANGCI_LINT := ./bin/golangci-lint
 GO_PACKAGES := $(shell go list ./... | grep -v vendor)
-MIGRATE_PATH=./pkg/config/migrations/migration.go
+MIGRATE_PATH=./pkg/config/migrations
 BUILD_OUTPUT := shelflove
 BUILD_INPUT := cmd/main.go
 TEST_FOLDER:=./pkg/tests
@@ -27,11 +27,15 @@ help:
 
 all: install migrate dev
 migrate:
-	@$(GO) run ${MIGRATE_PATH}
+	@$(GO) build -o ${MIGRATE_PATH}/migration ${MIGRATE_PATH}/migration.go
+	@chmod +x ${MIGRATE_PATH}/migration
+	@./${MIGRATE_PATH}/migration
 
 cleandb:
-	@CLEANDB=true $(GO) run ${MIGRATE_PATH}
-	@CLEANDB=false 
+	@$(GO) build -o ${MIGRATE_PATH}/migration ${MIGRATE_PATH}/migration.go
+	@chmod +x ${MIGRATE_PATH}/migration
+	@CLEANDB=true ./${MIGRATE_PATH}/migration
+
 lint:
 	@$(GOLANGCI_LINT) run
 	
@@ -42,7 +46,7 @@ test:
 host:
 	@echo "Hosting on apache server"
 	@chmod +x ./host.sh
-	@./host.sh
+	@bash host.sh --sudo
 install:
 	@echo "Installing dependencies..."
 	@$(GO) mod download

@@ -32,6 +32,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		username = r.FormValue("username")
 		password = r.FormValue("password")
 		u, err := models.GetUserbyUserName(username)
+		if err!=nil{
+			fmt.Println("No User found")
+			return 
+		}
 		err = signupRedirect(w, r, err, "/login", "Incorrect credentials")
 		if err == nil {
 			return

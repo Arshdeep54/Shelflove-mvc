@@ -7,7 +7,6 @@ import (
 
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/models"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/types"
-	"github.com/Arshdeep54/Shelflove-mvc/pkg/utils"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/views"
 )
 
@@ -103,15 +102,12 @@ func AdminDashboard(w http.ResponseWriter, r *http.Request) {
 
 }
 func LoginPage(w http.ResponseWriter, r *http.Request) {
-	err := utils.UpdateHeaders(w, &Data)
-	if err != nil {
-		fmt.Println("Error updating Data", err)
-	}
+
 	t := views.LoginPage()
 
 	Data.ErrorMessage = ErrorMessage
 
-	err = t.Execute(w, Data)
+	err := t.Execute(w, Data)
 	if err != nil {
 		fmt.Print(err.Error())
 	}

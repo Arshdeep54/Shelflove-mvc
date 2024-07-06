@@ -32,7 +32,6 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error parsing float:", err)
 		return
 	}
-	fmt.Println(book)
 	http.Redirect(w, r, "/admin", http.StatusSeeOther)
 }
 
