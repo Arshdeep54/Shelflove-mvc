@@ -1,6 +1,6 @@
 module github.com/Arshdeep54/Shelflove-mvc
 
-go 1.22.1
+go 1.22
 
 require golang.org/x/crypto v0.24.0
 
