@@ -29,4 +29,6 @@ sudo docker-compose --version
 sudo docker-compose up --build #to see the logs and build the image 
 sudo docker-compose up --build -d #to run in detach mode 
 
+
 ```
+- Go to http://cosign.org 

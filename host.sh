@@ -83,11 +83,11 @@ ${SUDO} apache2ctl configtest
 ${SUDO} systemctl restart apache2
 
 echo "${GREEN}Apache Server Hosted${DEFAULT}"
-echo "Check ${BLUE} http://${HOST_NAME}${DEFAULT}"
-echo "CLeaning db.."
 CLEANDB=true ./pkg/config/migrations/migration
+echo "CLeaning db.."
 
 echo "Migrating Data.."
 ./pkg/config/migrations/migration
+echo "Check ${BLUE} http://${HOST_NAME}${DEFAULT}"
 
 ./shelflove
