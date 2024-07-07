@@ -57,7 +57,7 @@ func GetBook(bookId string) (*types.Book, error) {
 		}
 		return nil, err
 	}
-	book.PublicationDate=publication_date.Format(utils.LAYOUT)
+	book.PublicationDate = publication_date.Format(utils.LAYOUT)
 	return &book, nil
 }
 
@@ -197,4 +197,23 @@ func UpdatebooksQuantity(payload *types.RequestPayload, increase bool) error {
 	}
 	return nil
 
+}
+
+func BookStatus(title string) (int, bool, error) {
+	db, err := config.DbConnection()
+	if err != nil {
+		return 0, false, fmt.Errorf("error connecting to Db: %w", err)
+	}
+	query := ` SELECT id
+        FROM book
+        WHERE title = ?
+		LIMIT 1;
+      `
+	row := db.QueryRow(query, title)
+	var bookid int
+	err = row.Scan(&bookid)
+	if err != nil {
+		return 0, false, nil
+	}
+	return bookid, true, nil
 }

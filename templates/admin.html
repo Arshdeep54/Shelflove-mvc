@@ -303,10 +303,12 @@
               <p class="text-red-500" id="errorQuant"></p>
             </div>
             <div>
-              <label class="text-xl" for="rating">Rating</label>
+              <label class="text-xl" for="rating">Rating ( out of 10)</label>
               <input
                 type="number"
                 name="rating"
+                max="10"
+                min="1"
                 class="input input-bordered w-full max-w-xs my-3 mx-3"
                 placeholder="Enter the rating of the book"
                 required
@@ -338,15 +340,13 @@
               </select>
             </div>
           </div>
-        </form>
-
-        <div class="modal-action">
-          <form method="dialog">
-            <button class="btn btn-primary addbook" type="submit" id="addbook">
+          <div class="flex items-center w-full justify-end flex-row" style="justify-content: flex-end">
+            <button class="btn btn-primary addbook mt-4" type="submit" id="addbook">
               Add
             </button>
-          </form>
-        </div>
+          </div>
+          
+        </form>
       </div>
     </dialog>
     {{ if gt (len .RequestedReturns) 0 }}
@@ -503,7 +503,7 @@
           headers: { "Content-Type": "application/json" },
         }).then((response) => {
           selectedUserIds.length = 0;
-          location.reload()
+          location.reload();
         });
       });
     </script>
@@ -550,12 +550,13 @@
           errorQuant.innerHTML = " ";
         }
       });
-      const addBookButton = document.getElementById("addbook");
-      const addnewbookForm = document.getElementById("addnewbookForm");
 
-      addBookButton.addEventListener("click", () => {
-        addnewbookForm.submit();
-      });
+      // const addBookButton = document.getElementById("addbook");
+      // const addnewbookForm = document.getElementById("addnewbookForm");
+
+      // addBookButton.addEventListener("click", () => {
+      //   addnewbookForm.submit();
+      // });
     </script>
   </body>
 </html>
