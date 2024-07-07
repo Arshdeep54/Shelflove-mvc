@@ -36,7 +36,6 @@ func UserDashboardPage() *template.Template {
 	return temp
 }
 
-
 func ErrorPage() *template.Template {
 	temp := template.Must(template.ParseFiles("templates/error.html"))
 	return temp

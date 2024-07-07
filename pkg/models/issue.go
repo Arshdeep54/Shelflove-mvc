@@ -79,9 +79,27 @@ func GetRequestedAll() ([]types.IssueWithDetails, []types.IssueWithDetails, erro
 	defer rows.Close()
 	for rows.Next() {
 		var request types.IssueWithDetails
-		err := rows.Scan(&request.Issue.Id, &request.Username, &request.Book.Id, &request.Book.Title, &request.Book.Quantity, &request.Book.Author, &request.Issue.Issue_date, &request.Issue.Expected_return_date, &request.Issue.ReturnRequested, &request.Issue.IssueRequested)
+		var (
+			issue    *time.Time
+			expected *time.Time
+		)
+		err := rows.Scan(&request.Issue.Id, &request.Username, &request.Book.Id, &request.Book.Title, &request.Book.Quantity, &request.Book.Author, &issue, &expected, &request.Issue.ReturnRequested, &request.Issue.IssueRequested)
 		if err != nil {
 			return nil, nil, fmt.Errorf("error scanning book data: %w", err)
+		}
+		if expected == nil {
+
+			request.Issue.Expected_return_date = "NOT ISSUED"
+		} else {
+			request.Issue.Expected_return_date = expected.Format(utils.LAYOUT)
+
+		}
+		if issue == nil {
+
+			request.Issue.Issue_date = "NOT ISSUED"
+		} else {
+			request.Issue.Issue_date = issue.Format(utils.LAYOUT)
+
 		}
 		request.IsIssued = !request.Issue.IssueRequested
 		requests = append(
@@ -167,9 +185,27 @@ func GetUserIssues(userId int) ([]types.IssueWithDetails, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var request types.IssueWithDetails
-		err := rows.Scan(&request.Issue.Id, &request.Issue.Book_id, &request.Issue.Issue_date, &request.Issue.Expected_return_date, &request.Book.Title, &request.Book.Author, &request.Issue.IsReturned, &request.Issue.IssueRequested, &request.Issue.ReturnRequested)
+		var (
+			issue    *time.Time
+			expected *time.Time
+		)
+		err := rows.Scan(&request.Issue.Id, &request.Issue.Book_id, &issue, &expected, &request.Book.Title, &request.Book.Author, &request.Issue.IsReturned, &request.Issue.IssueRequested, &request.Issue.ReturnRequested)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning book data: %w", err)
+		}
+		if expected == nil {
+
+			request.Issue.Expected_return_date = "NOT ISSUED"
+		} else {
+			request.Issue.Expected_return_date = expected.Format(utils.LAYOUT)
+
+		}
+		if issue == nil {
+
+			request.Issue.Issue_date = "NOT ISSUED"
+		} else {
+			request.Issue.Issue_date = issue.Format(utils.LAYOUT)
+
 		}
 		requests = append(
 			requests, request)
@@ -225,7 +261,7 @@ func DenyIssueRequest(id int, denyType string) error {
 	if err != nil {
 		return fmt.Errorf("error connecting to Db: %w", err)
 	}
-	result, err := db.Exec(query,id)
+	result, err := db.Exec(query, id)
 	if err != nil {
 		return err
 	}

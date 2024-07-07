@@ -27,7 +27,7 @@
             <th>Title</th>
             <th>Author</th>
             <th>Issued Date</th>
-            <th>Return Date</th>
+            <th>Return Date(exp.)</th>
             <th>Requested Return</th>
             <th>Select to approve</th>
           </tr>
@@ -70,7 +70,7 @@
             </td>
             <td>{{ .Book.Author }}</td>
             <td>{{ .Issue.Issue_date }}</td>
-            <td>{{ .Issue.Returned_date }}</td>
+            <td>{{ .Issue.Expected_return_date }}</td>
             <td>{{ .Issue.ReturnRequested }}</td>
             <td>
               <input

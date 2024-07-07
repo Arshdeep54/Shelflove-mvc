@@ -14,9 +14,21 @@ type Issue struct {
 	IssueRequested       bool `default:"false"`
 	Fine                 int  `default:"0"`
 }
+type IssueRender struct {
+	Id                   int
+	User_id              int
+	Book_id              int
+	Issue_date           string
+	Expected_return_date string
+	Returned_date        string
+	IsReturned           bool `default:"false"`
+	ReturnRequested      bool `default:"false"`
+	IssueRequested       bool `default:"false"`
+	Fine                 int  `default:"0"`
+}
 
 type IssueWithDetails struct {
-	Issue    Issue
+	Issue    IssueRender
 	Book     Book
 	IsIssued bool
 	Username string

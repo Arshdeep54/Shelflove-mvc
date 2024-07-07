@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/config"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/types"
+	"github.com/Arshdeep54/Shelflove-mvc/pkg/utils"
 )
 
 func GetAllBooks() ([]types.Book, error) {
@@ -47,13 +49,15 @@ func GetBook(bookId string) (*types.Book, error) {
 	query := `SELECT * FROM book WHERE id = ? `
 	row := db.QueryRow(query, id)
 	var book types.Book
-	err = row.Scan(&book.Id, &book.Title, &book.Author, &book.PublicationDate, &book.Quantity, &book.Genre, &book.Description, &book.Rating, &book.Address)
+	var publication_date *time.Time
+	err = row.Scan(&book.Id, &book.Title, &book.Author, &publication_date, &book.Quantity, &book.Genre, &book.Description, &book.Rating, &book.Address)
 	if err != nil {
 		if err.Error() == sql.ErrNoRows.Error() {
 			fmt.Print("looo")
 		}
 		return nil, err
 	}
+	book.PublicationDate=publication_date.Format(utils.LAYOUT)
 	return &book, nil
 }
 

@@ -22,7 +22,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Print("error parsing the book", err)
 	}
-	if book.Title == "" || book.Address == " " || book.Description == "" || book.Quantity == 0 || book.PublicationDate == nil || book.Rating == 0 || book.Address == "" || book.Genre == "" {
+	if book.Title == "" || book.Address == " " || book.Description == "" || book.Quantity == 0 || book.PublicationDate == " " || book.Rating == 0 || book.Address == "" || book.Genre == "" {
 		ErrorData.Message = "Empty fields"
 		http.Redirect(w, r, "/error", http.StatusSeeOther)
 		return

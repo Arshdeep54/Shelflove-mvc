@@ -22,7 +22,6 @@ format_time(){
   printf "%02d:%02d:%02d\n" "$hours" "$minutes" "$seconds"
 }
 
-
 if [[ $# -gt 0 ]]; then
   if [[ "$1" == "--sudo" ]]; then
     SUDO=sudo
@@ -48,7 +47,6 @@ while [[ $sleep_duration -gt 0 ]]; do
 done
 
 ${SUDO} echo "Script execution continues...${SUDO}"
-
 
 
 if ! which apache2 >/dev/null 2>&1; then
