@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/controllers"
+	"github.com/Arshdeep54/Shelflove-mvc/pkg/models"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/types"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/utils"
 	"github.com/golang-jwt/jwt"
@@ -14,17 +15,17 @@ func Authenticate(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		jwtToken, err := r.Cookie("jwtToken")
 		if err != nil {
-			writeHeaders(w, r, next, 0, false, false, "", "")
+			writeHeaders(w, r, next, 0,  false, "", "")
 			return
 		}
 		token, err := utils.ValidateJWT(jwtToken.Value)
 		if err != nil {
-			writeHeaders(w, r, next, 0, false, false, "", "")
+			writeHeaders(w, r, next, 0, false, "", "")
 			return
 		}
 
 		if !token.Valid {
-			writeHeaders(w, r, next, 0, false, false, "", "")
+			writeHeaders(w, r, next, 0, false, "", "")
 			return
 		}
 
@@ -34,16 +35,20 @@ func Authenticate(next http.HandlerFunc) http.HandlerFunc {
 		var payload types.JwtPayload
 		err = json.Unmarshal([]byte(str), &payload)
 		if err != nil {
-			writeHeaders(w, r, next, 0, false, false, "", "")
+			writeHeaders(w, r, next, 0, false, "", "")
 			return
 		}
-		writeHeaders(w, r, next, int(payload.Id), payload.IsAdmin, true, payload.Username, payload.Email)
+		writeHeaders(w, r, next, int(payload.Id) ,true, payload.Username, payload.Email)
 	}
 }
 
-func writeHeaders(w http.ResponseWriter, r *http.Request, next http.HandlerFunc, userId int, IsAdmin bool, IsLoggedIn bool, username string, email string) {
+func writeHeaders(w http.ResponseWriter, r *http.Request, next http.HandlerFunc, userId int, IsLoggedIn bool, username string, email string) {
+	isAdmin,err:=models.IsAdmin(userId)
+	if err!=nil {
+		isAdmin=false
+	}
+	controllers.Data.IsAdmin = isAdmin
 	controllers.Data.UserId = userId
-	controllers.Data.IsAdmin = IsAdmin
 	controllers.Data.IsLoggedIn = IsLoggedIn
 	controllers.Data.Username = username
 	controllers.Data.Email = email

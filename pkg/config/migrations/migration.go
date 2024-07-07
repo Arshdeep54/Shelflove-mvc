@@ -16,7 +16,8 @@ func main()  {
     db,err:=config.DbConnection()
 	if err != nil {
         fmt.Println("%w", err)
-		return 
+		os.Exit(1)
+        return
     }
 	exists, err := dbExists(db)
     if err != nil {
@@ -92,15 +93,15 @@ func migrateDummyData(db *sql.DB) error {
 	return nil
 }
 func cleanDB(db *sql.DB) error {
-    _, err := db.Exec("DELETE FROM issue;")
+    _, err := db.Exec("DROP TABLE issue;")
     if err != nil {
         return err
     }
-    _, err = db.Exec("DELETE FROM book;")
+    _, err = db.Exec("DROP TABLE book;")
     if err != nil {
         return err
     }
-    _, err = db.Exec("DELETE FROM user;")
+    _, err = db.Exec("DROP TABLE user;")
     if err != nil {
         return err
     }

@@ -40,6 +40,20 @@ func GetUserbyUserName(username string) (*types.User, error) {
 	}
 	return &user, nil
 }
+func IsAdmin(userId int) (bool, error) {
+	query := `SELECT isAdmin FROM user WHERE id = ?`
+	db, err := config.DbConnection()
+	if err != nil {
+		return false, err
+	}
+	row := db.QueryRow(query, userId)
+	var isAdmin bool
+	err = row.Scan(&isAdmin)
+	if err != nil {
+		return false, err
+	}
+	return isAdmin, nil
+}
 func createFirstUserAdmin(db *sql.DB) error {
 	query := `UPDATE user SET isAdmin=true WHERE id=1`
 	_, err := db.Exec(query)

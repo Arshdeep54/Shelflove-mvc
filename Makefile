@@ -17,7 +17,7 @@ help:
 	@echo "Available targets:"
 	@echo "  all      - Runs install ,migrate ,dev"
 	@echo "  install  - Install dependencies and create vendor folder"
-	@echo "  migrate  - Create a Database,tables and pushes some dummy data"
+	@echo "  migrate  - Create tables and pushes some dummy book data"
 	@echo "  cleandb  - Clean the data in the tables"
 	@echo "  build    - Build the project"
 	@echo "  dev      - Start development server"
@@ -37,6 +37,7 @@ cleandb:
 	@CLEANDB=true ./${MIGRATE_PATH}/migration
 
 lint:
+	@echo "Linting ..."
 	@$(GOLANGCI_LINT) run
 	
 test:

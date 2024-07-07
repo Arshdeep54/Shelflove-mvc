@@ -182,7 +182,6 @@ func UpdateIssue(issueIds []string, updateType string) error {
 	nextDate := now.AddDate(0, 0, 14)
 	formattedTodayDate := now.Format("2006-01-02")
 	formattedReturnDate := nextDate.Format("2006-01-02")
-	fmt.Println(formattedReturnDate)
 	var keyString string
 	for _, key := range issueIds {
 		keyString += key
@@ -196,7 +195,6 @@ func UpdateIssue(issueIds []string, updateType string) error {
 	} else if updateType == utils.RETURNED {
 		query = fmt.Sprintf(` UPDATE issue SET returnRequested = FALSE, isReturned = TRUE ,returned_date ='%s' WHERE id IN (%s) `, formattedTodayDate, keyString)
 	}
-	fmt.Println(query)
 	db, err := config.DbConnection()
 	if err != nil {
 		return fmt.Errorf("error connecting to Db: %w", err)
@@ -211,7 +209,6 @@ func UpdateIssue(issueIds []string, updateType string) error {
 	}
 	println(rowsAffected)
 	if rowsAffected == 0 {
-		fmt.Println("no updation")
 		return fmt.Errorf("no Updation")
 	}
 	return nil
@@ -237,7 +234,6 @@ func DenyIssueRequest(id int, denyType string) error {
 		return err
 	}
 	if rowsAffected == 0 {
-		fmt.Println("no updation")
 		return fmt.Errorf("no Updation")
 	}
 	return nil

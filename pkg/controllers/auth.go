@@ -32,10 +32,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		username = r.FormValue("username")
 		password = r.FormValue("password")
 		u, err := models.GetUserbyUserName(username)
-		if err!=nil{
-			fmt.Println("No User found")
-			return 
-		}
 		err = signupRedirect(w, r, err, "/login", "Incorrect credentials")
 		if err == nil {
 			return
@@ -106,11 +102,10 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 		user := types.RegisterUserPayload{Username: username, Email: email, Password: hashedPassword}
 		err = models.AddNewUser(&user)
-		err = signupRedirect(w, r, err, "/signup", "Error Adding User")
+		err = signupRedirect(w, r, err, "/signup", "Username or email already used")
 		if err == nil {
 			return
 		}
-		fmt.Printf("Adding the user %s to the database\n", username)
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 
 	}

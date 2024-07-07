@@ -4,22 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shelflove</title>
-    <link type="text/css" href="/css/style.css" rel="stylesheet" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/daisyui@4.12.2/dist/full.min.css"
-      rel="stylesheet"
-      type="text/css"
-    />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link type="text/css" href="/static/style.css" rel="stylesheet" />
   </head>
 
   <body>
     {{ template "navbar" . }}
     <div class="mx-5 my-5">
-      <h1 class="text text-xl font-bold">Admin dashboard</h1>
-      <h2 class="text text-lg text-primary mb-5">
+      <h1 class="text text-2xl font-bold">Admin dashboard</h1>
+      <h2 class="text text-xl text-primary mb-5">
         {{ .Username }} ( {{ .Email }} )
       </h2>
+      <div class="divider"></div>
       {{ if gt (len .RequestedReturns) 0 }}
       <div class="flex flex-row justify-between">
         <h3 class="text text-slate-400 text-2xl">Requested returns</h3>
@@ -205,12 +200,12 @@
           <tbody>
             {{ range .RequestedAdmins }}
             <tr>
-              <td>{{ .Id }}</td>
+              <td class="text-lg">{{ .Id }}</td>
 
-              <td>{{ .Username }}</td>
-              <td>{{ .Email }}</td>
+              <td class="text-lg">{{ .Username }}</td>
+              <td class="text-lg">{{ .Email }}</td>
 
-              <td>
+              <td class="text-lg">
                 <input
                   type="checkbox"
                   class="checkbox admin-checkbox"
@@ -257,6 +252,7 @@
                 name="title"
                 class="input input-bordered w-full max-w-xs my-3 mx-3"
                 placeholder="Enter book title"
+                required
               />
             </div>
             <div>
@@ -266,6 +262,7 @@
                 name="author"
                 class="input input-bordered w-full max-w-xs my-3 mx-3"
                 placeholder="Enter book Author"
+                required
               />
             </div>
           </div>
@@ -276,6 +273,7 @@
                 class="textarea textarea-bordered textarea-lg mx-3 resize-none max-w-xs border-solid outline-none rounded-xl my-3"
                 name="description"
                 placeholder="Enter the book description"
+                required
               ></textarea>
             </div>
             <div class="ml-8">
@@ -286,6 +284,7 @@
                 type="date"
                 name="publication_date"
                 class="input outline-none focus:outline-none my-3 mx-3"
+                required
               />
             </div>
           </div>
@@ -299,6 +298,7 @@
                 id="positiveQuantityInput"
                 class="input input-bordered w-full max-w-xs my-3 mx-3"
                 placeholder="Enter how many books to enter"
+                required
               />
               <p class="text-red-500" id="errorQuant"></p>
             </div>
@@ -309,6 +309,7 @@
                 name="rating"
                 class="input input-bordered w-full max-w-xs my-3 mx-3"
                 placeholder="Enter the rating of the book"
+                required
               />
             </div>
           </div>
@@ -320,6 +321,7 @@
                 name="address"
                 class="input input-bordered w-full max-w-xs my-3 mx-3"
                 placeholder="Enter book address"
+                required
               />
             </div>
             <div>
@@ -395,7 +397,7 @@
         }).then((response) => {
           selectedIssueIds.length = 0;
           selectedReturnbooks = {};
-          // location.reload();
+          location.reload();
         });
       });
     </script>
@@ -461,7 +463,7 @@
         }).then((response) => {
           selectedIssueReqIds.length = 0;
           selectedIssuebooks = {};
-          // location.reload();
+          location.reload();
         });
       });
     </script>
@@ -496,11 +498,12 @@
         console.log(requestBody);
 
         fetch("/api/admin/approveadmin/", {
-          method:"POST",
+          method: "POST",
           body: requestBody,
           headers: { "Content-Type": "application/json" },
         }).then((response) => {
           selectedUserIds.length = 0;
+          location.reload()
         });
       });
     </script>

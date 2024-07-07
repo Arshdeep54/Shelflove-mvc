@@ -1,23 +1,23 @@
 # Shelflove-mvc
  
-## To run locally
-- Clone the repo ```git clone git@github.com:Arshdeep54/Shelflove-mvc.git```
-- ```cd Shelflove-mvc ```
-- rename `.env.example` file to `.env` and fill it with your db info .
-- ```make help``` or just ```make``` : It will help you with further installation 
+## Setup  
+- open a your development folder
+- ```wget https://raw.githubusercontent.com/Arshdeep54/Shelflove-mvc/main/setup.sh``` 
+- ```chmod +x host.sh #To change execution permission```
+- ```./setup.sh```
 
 ### Install air 
+- Also asked to install in setup script 
 ```bash
 curl -sSfL https://raw.githubusercontent.com/air-verse/air/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
 ```
-
+### Install make 
+- If while running you get error make not found 
+- ```sudo apt install make```
 ### For Runnning via  docker
 
-- Before running via docker ,free up the port 3306,  stop your mysql server with ```sudo service mysql stop``` 
-- To Restart the service after testing docker ```sudo service mysql restart``` 
 - Rename .env.example to .env 
   - Add any jwt secret and dont change the db configurations , docker compose uses that 
-
 
 ```bash
 

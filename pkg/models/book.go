@@ -187,12 +187,10 @@ func UpdatebooksQuantity(payload *types.RequestPayload, increase bool) error {
 	if err != nil {
 		return err
 	}
-	println(rowsAffected)
 	if rowsAffected == 0 {
 		fmt.Println("no updation")
 		return fmt.Errorf("no Updation")
 	}
-	fmt.Println(query)
 	return nil
 
 }

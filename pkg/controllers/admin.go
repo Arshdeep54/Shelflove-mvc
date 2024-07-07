@@ -82,7 +82,6 @@ func ApproveIssues(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request body: missing or invalid issue IDs", http.StatusBadRequest)
 		return
 	}
-	fmt.Println(payload.IssueIds)
 	err = models.UpdatebooksQuantity(&payload, false)
 	if err != nil {
 		fmt.Println("Error updating quantity:", err)
@@ -162,9 +161,8 @@ func ApproveAdmin(w http.ResponseWriter, r *http.Request) {
 	var request adminrequest
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
-		fmt.Println("Erro:", err)
+		fmt.Println("Error:", err)
 	}
-	fmt.Println(request.Ids)
 	if request.Ids == nil || len(request.Ids) == 0 {
 		http.Error(w, "Invalid request body: missing or invalid  IDs", http.StatusBadRequest)
 		return

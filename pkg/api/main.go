@@ -10,6 +10,10 @@ import (
 )
 
 func Start() {
+
+	//serve static css
+	http.HandleFunc("/static/", controllers.StaticHandler)
+
 	//render Routes
 	http.HandleFunc("/", middlewares.Authenticate(controllers.Home))
 	http.HandleFunc("/books", middlewares.Authenticate(controllers.Books))
@@ -46,6 +50,6 @@ func Start() {
 
 	err := http.ListenAndServe(":8000", nil)
 	if err != nil {
-		fmt.Println("Error Starting the sever ...",err)
+		fmt.Println("Error Starting the sever ...", err)
 	}
 }

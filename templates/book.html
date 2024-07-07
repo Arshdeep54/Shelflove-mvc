@@ -4,16 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shelflove</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
-    <link type="text/css" href="/public/style.css" rel="stylesheet" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css"
-      rel="stylesheet"
-      type="text/css"
-    />
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
+    <link type="text/css" href="/static/style.css" rel="stylesheet" />
+    </head>
   <body>
     {{ template "navbar" . }}
 
@@ -47,11 +39,11 @@
           {{ if or .IssueRequested .IsIssued}} 
           
           {{ if .IssueRequested }}
-          <button type="submit" class="btn btn-secondary" disabled>
+          <button type="submit" class="btn btn-warning" disabled>
             Issue Requested
           </button>
           {{ else }}
-          <button type="submit" class="btn btn-secondary" disabled>
+          <button type="submit" class="btn btn-warning" disabled>
             Issued
           </button>
           {{end}}
@@ -70,11 +62,11 @@
               value="{{ .UserId }}"
             />
             {{ if .IsReturnRequested }}
-            <button type="submit" class="btn btn-secondary" disabled>
+            <button type="submit" class="btn btn-warning" disabled>
               Return Requested
             </button>
             {{ else }} {{if .IssueRequested}}
-            <button type="submit" class="btn btn-secondary" disabled>
+            <button type="submit" class="btn btn-warning" disabled>
               Return Request
             </button>
             {{else}}
