@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# git clone git@github.com:Arshdeep54/Shelflove-mvc.git
+git clone git@github.com:Arshdeep54/Shelflove-mvc.git
 BLUE='\033[0;34m'
 DEFAULT='\033[0m'
 GREEN='\033[0;32m'
