@@ -62,8 +62,8 @@ else
   echo -e "Running ${YELLOW}make help${DEFAULT} for further testing"
   make help
 fi
-
 echo " "
+echo -e "    ${BLUE}cd Shelflove-mvc${DEFAULT}"
 
 
 
