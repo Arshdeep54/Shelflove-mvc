@@ -1,6 +1,10 @@
 #!/bin/bash
+read -p "Want to clone ? y/N " clone
 
-git clone git@github.com:Arshdeep54/Shelflove-mvc.git
+if [[ "$clone" =~ ^[Yy]$ ]]; then
+  git clone git@github.com:Arshdeep54/Shelflove-mvc.git
+fi
+
 BLUE='\033[0;34m'
 DEFAULT='\033[0m'
 GREEN='\033[0;32m'
@@ -12,12 +16,12 @@ cd Shelflove-mvc
 read -p "Enter Your mysql username: " MYSQL_USERNAME
 read -s -p "Enter Your mysql password: " MYSQL_PASSWORD
 echo
-read -s -p "Enter a secure jwt secret: " JWT_PASSWORD
+read -s -p "Enter a secure jwt secret: " JWT_SECRET
 echo
 echo "You can run in three ways"
 echo -e "1. at localhost:8000 with ${YELLOW}make dev${DEFAULT}"
 echo -e "2. at http://cosign.org with apache hosting ${YELLOW}make host${DEFAULT}"
-echo -e "3. with docker using docker-compose.yml"
+echo -e "3. with docker using docker-compose.yml (run ./docker.sh) "
 echo 
 MYSQL_HOST=localhost
 
@@ -33,7 +37,7 @@ fi
 
 ENV_CONFIG=$(cat <<EOF
 MYSQL_HOST=${MYSQL_HOST}  #for docker change it to db
-MYSQL_USERNAME=${MYSQL_USERNAAME}    #for docker change it to user
+MYSQL_USERNAME=${MYSQL_USERNAME}    #for docker change it to user
 MYSQL_PASSWORD='${MYSQL_PASSWORD}'    #for docker change it to password
 MYSQL_DATABASE=shelflove  
 JWT_SECRET='${JWT_SECRET}
