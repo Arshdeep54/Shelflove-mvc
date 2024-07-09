@@ -44,6 +44,8 @@ type RenderData struct {
 	RequestedIssues   []IssueWithDetails
 	RequestedAdmins   []AdminRequest
 	AdminRequested    bool
+	HomeActive        bool
+	BooksActive       bool
 }
 
 type RequestPayload struct {

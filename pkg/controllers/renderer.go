@@ -23,6 +23,8 @@ var Data = types.RenderData{
 	AdminRequested:    false,
 	Username:          "",
 	Email:             "",
+	HomeActive:        false,
+	BooksActive:       false,
 }
 
 var ErrorMessage string
@@ -30,7 +32,8 @@ var ErrorMessage string
 func Home(w http.ResponseWriter, r *http.Request) {
 
 	t := views.HomePage()
-
+	Data.HomeActive = true
+	Data.BooksActive=false
 	err := t.Execute(w, Data)
 	if err != nil {
 		fmt.Print(err.Error())
@@ -45,6 +48,8 @@ func Books(w http.ResponseWriter, r *http.Request) {
 		fmt.Print(err.Error())
 	}
 	Data.Books = books
+	Data.HomeActive = false
+	Data.BooksActive = true
 	err = t.Execute(w, Data)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -58,6 +63,8 @@ func Book(w http.ResponseWriter, r *http.Request) {
 		fmt.Print(err.Error())
 	}
 	Data.Book = book
+	Data.HomeActive = false
+	Data.BooksActive = false
 	err = t.Execute(w, Data)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -70,7 +77,9 @@ func UserDashboard(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Print(err.Error())
 	}
-	
+	Data.HomeActive = false
+	Data.BooksActive = false
+
 	Data.RequestedIssues = userIssues
 	err = t.Execute(w, Data)
 	if err != nil {
@@ -91,7 +100,8 @@ func AdminDashboard(w http.ResponseWriter, r *http.Request) {
 		Data.RequestedAdmins = requestAdmin
 		Data.RequestedIssues = requestedIssues
 		Data.RequestedReturns = requestedReturns
-
+		Data.HomeActive = false
+		Data.BooksActive = false
 		err = t.Execute(w, Data)
 		if err != nil {
 			fmt.Print(err.Error())
@@ -107,7 +117,8 @@ func LoginPage(w http.ResponseWriter, r *http.Request) {
 	t := views.LoginPage()
 
 	Data.ErrorMessage = ErrorMessage
-
+	Data.HomeActive = false
+	Data.BooksActive = false
 	err := t.Execute(w, Data)
 	if err != nil {
 		fmt.Print(err.Error())
@@ -116,6 +127,8 @@ func LoginPage(w http.ResponseWriter, r *http.Request) {
 
 func SignUpPage(w http.ResponseWriter, r *http.Request) {
 	Data.ErrorMessage = ErrorMessage
+	Data.HomeActive = false
+	Data.BooksActive = false
 	t := views.SignUpPage()
 	err := t.Execute(w, Data)
 	if err != nil {

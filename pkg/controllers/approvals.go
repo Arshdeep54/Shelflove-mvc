@@ -108,7 +108,11 @@ func ApproveAdmin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request body: missing or invalid  IDs", http.StatusBadRequest)
 		return
 	}
-
+    err=models.BalanceIssues(request.Ids)
+	if err!=nil{
+		fmt.Println(err.Error())
+		return
+	}
 	err = models.ApproveAdmin(request.Ids)
 	if err != nil {
 		fmt.Println("Error approve admin:", err)

@@ -35,6 +35,7 @@ func GetAllBooks() ([]types.Book, error) {
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error iterating over rows: %w", err)
 	}
+	db.Close()
 	return books, nil
 }
 func GetBook(bookId string) (*types.Book, error) {
@@ -58,6 +59,7 @@ func GetBook(bookId string) (*types.Book, error) {
 		return nil, err
 	}
 	book.PublicationDate = publication_date.Format(utils.LAYOUT)
+	db.Close()
 	return &book, nil
 }
 
@@ -74,6 +76,7 @@ func AddNewBook(book *types.Book) error {
 	if err != nil {
 		return err
 	}
+	db.Close()
 	return nil
 }
 func Updatebook(book *types.Book, id int) error {
@@ -102,7 +105,7 @@ func Updatebook(book *types.Book, id int) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("book Not Found")
 	}
-
+	db.Close()
 	return nil
 }
 func DeleteBook(id int64) error {
@@ -122,6 +125,7 @@ func DeleteBook(id int64) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("book Not Found")
 	}
+	db.Close()
 	return nil
 }
 func IssuedBookCount(id int64) (int, error) {
@@ -140,6 +144,7 @@ func IssuedBookCount(id int64) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("error scaning: %w", err)
 	}
+	db.Close()
 	return count, nil
 }
 func BookCount(id int64) (int, error) {
@@ -157,6 +162,7 @@ func BookCount(id int64) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("error scaning: %w", err)
 	}
+	db.Close()
 	return count, nil
 }
 func UpdatebooksQuantity(payload *types.RequestPayload, increase bool) error {
@@ -177,7 +183,7 @@ func UpdatebooksQuantity(payload *types.RequestPayload, increase bool) error {
 	}
 	keyString = strings.Trim(keyString, ",")
 	query += fmt.Sprintf(` ELSE (quantity) END ) WHERE id IN (%s)`, keyString)
-
+	fmt.Println("admin:", query)
 	db, err := config.DbConnection()
 	if err != nil {
 		return fmt.Errorf("error connecting to Db: %w", err)
@@ -195,6 +201,7 @@ func UpdatebooksQuantity(payload *types.RequestPayload, increase bool) error {
 		fmt.Println("no updation")
 		return fmt.Errorf("no Updation")
 	}
+	db.Close()
 	return nil
 
 }
@@ -215,5 +222,6 @@ func BookStatus(title string) (int, bool, error) {
 	if err != nil {
 		return 0, false, nil
 	}
+	db.Close()
 	return bookid, true, nil
 }

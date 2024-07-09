@@ -30,35 +30,10 @@ func GetIssue(bookId string, userId int) (*types.Issue, error) {
 	if err != nil {
 		return nil, err
 	}
+	db.Close()
 	return &issue, nil
 }
 
-func GetAdminRequest() ([]types.AdminRequest, error) {
-	db, err := config.DbConnection()
-	if err != nil {
-		return nil, fmt.Errorf("error connecting to Db: %w", err)
-	}
-	var adminRequests []types.AdminRequest
-	query := `
-      SELECT u.id AS userId, u.username, u.email
-      FROM user u
-      WHERE adminRequest = TRUE
-    `
-	rows, err := db.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("error querying admin request: %w", err)
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var adminRequest types.AdminRequest
-		err := rows.Scan(&adminRequest.Id, &adminRequest.Username, &adminRequest.Email)
-		if err != nil {
-			return nil, fmt.Errorf("error scanning book data: %w", err)
-		}
-		adminRequests = append(adminRequests, adminRequest)
-	}
-	return adminRequests, nil
-}
 func GetRequestedAll() ([]types.IssueWithDetails, []types.IssueWithDetails, error) {
 	db, err := config.DbConnection()
 	if err != nil {
@@ -88,18 +63,14 @@ func GetRequestedAll() ([]types.IssueWithDetails, []types.IssueWithDetails, erro
 			return nil, nil, fmt.Errorf("error scanning book data: %w", err)
 		}
 		if expected == nil {
-
 			request.Issue.Expected_return_date = "NOT ISSUED"
 		} else {
 			request.Issue.Expected_return_date = expected.Format(utils.LAYOUT)
-
 		}
 		if issue == nil {
-
 			request.Issue.Issue_date = "NOT ISSUED"
 		} else {
 			request.Issue.Issue_date = issue.Format(utils.LAYOUT)
-
 		}
 		request.IsIssued = !request.Issue.IssueRequested
 		requests = append(
@@ -115,6 +86,7 @@ func GetRequestedAll() ([]types.IssueWithDetails, []types.IssueWithDetails, erro
 			requestedIssues = append(requestedIssues, result)
 		}
 	}
+	db.Close()
 	return requestedReturns, requestedIssues, nil
 }
 
@@ -130,6 +102,7 @@ func ExistingIssueCount(userId int) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("error connecting to Db: %w", err)
 	}
+	db.Close()
 	return count, nil
 }
 func AddNewIssue(userID int, bookId int) error {
@@ -142,6 +115,7 @@ func AddNewIssue(userID int, bookId int) error {
 	if err != nil {
 		return err
 	}
+	db.Close()
 	return nil
 }
 func ReturnRequest(userID int, bookId int) error {
@@ -163,6 +137,7 @@ func ReturnRequest(userID int, bookId int) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("issue Not Found")
 	}
+	db.Close()
 	return nil
 }
 func GetUserIssues(userId int) ([]types.IssueWithDetails, error) {
@@ -210,6 +185,7 @@ func GetUserIssues(userId int) ([]types.IssueWithDetails, error) {
 		requests = append(
 			requests, request)
 	}
+	db.Close()
 	return requests, nil
 }
 
@@ -243,10 +219,10 @@ func UpdateIssue(issueIds []string, updateType string) error {
 	if err != nil {
 		return err
 	}
-	println(rowsAffected)
 	if rowsAffected == 0 {
 		return fmt.Errorf("no Updation")
 	}
+	db.Close()
 	return nil
 }
 
@@ -272,6 +248,54 @@ func DenyIssueRequest(id int, denyType string) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("no Updation")
 	}
+	db.Close()
 	return nil
 
+}
+
+func BalanceIssues(userIds []string) error {
+	// get issues of that user :
+	var issues []types.IssueWithDetails
+	for _, value := range userIds {
+		id, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			return fmt.Errorf("error parsing to int")
+		}
+		userIssues, err := GetUserIssues(int(id))
+		if err != nil {
+			fmt.Println(err.Error())
+			return err
+		}
+		issues = append(issues, userIssues...)
+	}
+	var issueIds []string
+	var selectedBooks = map[string]int{}
+	for _, value := range issues {
+		if value.Issue.IssueRequested {
+			err := DenyIssueRequest(value.Issue.Id, utils.ISSUED)
+			if err != nil {
+
+				fmt.Println(err.Error())
+				return err
+			}
+		} else if !value.Issue.IsReturned && !value.Issue.IssueRequested {
+			issueIds = append(issueIds, strconv.Itoa(value.Issue.Id))
+			selectedBooks[strconv.Itoa(int(value.Issue.Book_id))] += 1
+		}
+	}
+	payload := types.RequestPayload{
+		IssueIds:      issueIds,
+		SelectedBooks: selectedBooks,
+	}
+	err := UpdatebooksQuantity(&payload, true)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	err = UpdateIssue(issueIds, utils.RETURNED)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
 }

@@ -15,6 +15,7 @@ func AddNewUser(user *types.RegisterUserPayload) error {
 	if err != nil {
 		return err
 	}
+
 	_, err = db.Exec(query, user.Username, user.Email, user.Password)
 	if err != nil {
 		return err
@@ -23,6 +24,7 @@ func AddNewUser(user *types.RegisterUserPayload) error {
 	if err != nil {
 		return err
 	}
+	db.Close()
 	return nil
 }
 func GetUserbyUserName(username string) (*types.User, error) {
@@ -31,6 +33,7 @@ func GetUserbyUserName(username string) (*types.User, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	row := db.QueryRow(query, username)
 
 	var user types.User
@@ -38,6 +41,7 @@ func GetUserbyUserName(username string) (*types.User, error) {
 	if err != nil {
 		return nil, err
 	}
+	db.Close()
 	return &user, nil
 }
 func IsAdmin(userId int) (bool, error) {
@@ -52,6 +56,7 @@ func IsAdmin(userId int) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	db.Close()
 	return isAdmin, nil
 }
 func createFirstUserAdmin(db *sql.DB) error {
@@ -60,7 +65,35 @@ func createFirstUserAdmin(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
+	db.Close()
 	return nil
+}
+func GetAdminRequest() ([]types.AdminRequest, error) {
+	db, err := config.DbConnection()
+	if err != nil {
+		return nil, fmt.Errorf("error connecting to Db: %w", err)
+	}
+	var adminRequests []types.AdminRequest
+	query := `
+      SELECT u.id AS userId, u.username, u.email
+      FROM user u
+      WHERE adminRequest = TRUE
+    `
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("error querying admin request: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var adminRequest types.AdminRequest
+		err := rows.Scan(&adminRequest.Id, &adminRequest.Username, &adminRequest.Email)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning book data: %w", err)
+		}
+		adminRequests = append(adminRequests, adminRequest)
+	}
+	db.Close()
+	return adminRequests, nil
 }
 func AdminRequest(userId int) error {
 	query := `UPDATE user SET adminRequest = TRUE WHERE id=?`
@@ -79,7 +112,7 @@ func AdminRequest(userId int) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("error Updating")
 	}
-
+	db.Close()
 	return nil
 }
 func AdminRequestSent(userId int) (bool, error) {
@@ -101,6 +134,7 @@ func AdminRequestSent(userId int) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	db.Close()
 	return request, nil
 }
 
@@ -127,6 +161,7 @@ func ApproveAdmin(userIds []string) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("error Updating")
 	}
+	db.Close()
 	return nil
 }
 func DenyAdminRequest(userId int) error {
@@ -146,6 +181,7 @@ func DenyAdminRequest(userId int) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("error Updating")
 	}
+	db.Close()
 
 	return nil
 }

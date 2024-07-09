@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/models"
+	"github.com/Arshdeep54/Shelflove-mvc/pkg/utils"
 )
 
 func IssueBook(w http.ResponseWriter, r *http.Request) {
@@ -13,8 +14,8 @@ func IssueBook(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error fetching existing issues", err)
 		return
 	}
-	if existingIssuesCount > 0 {
-		ErrorData.Message = "You Have not returned a book yet "
+	if existingIssuesCount >= utils.BOOK_ISSUE_LIMIT {
+		ErrorData.Message = fmt.Sprintf("You have already issued %d books",existingIssuesCount)
 		http.Redirect(w, r, "/error", http.StatusSeeOther)
 		return
 	}

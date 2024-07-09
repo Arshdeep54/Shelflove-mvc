@@ -15,7 +15,7 @@ TEST_FOLDER:=./pkg/tests
 
 help:
 	@echo "Available targets:"
-	@echo "  all      - Runs install ,migrate ,dev"
+	@echo "  all      - Install ,erase all data, migrate,run "
 	@echo "  install  - Install dependencies and create vendor folder"
 	@echo "  migrate  - Create tables and pushes some dummy book data"
 	@echo "  cleandb  - Clean the data in the tables"
@@ -25,7 +25,7 @@ help:
 	@echo "  test     - Run unit tests " 
 	@echo "  host     - Host on Apache Server " 
 
-all: install migrate dev
+all: install cleandb migrate dev
 migrate:
 	@$(GO) build -o ${MIGRATE_PATH}/migration ${MIGRATE_PATH}/migration.go
 	@chmod +x ${MIGRATE_PATH}/migration
