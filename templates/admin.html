@@ -11,222 +11,251 @@
     {{ template "navbar" . }}
     <div class="mx-5 my-5">
       <h1 class="text text-2xl font-bold">Admin dashboard</h1>
-      <h2 class="text text-xl text-primary mb-5">
-        {{ .Username }} ( {{ .Email }} )
-      </h2>
+      <h2 class="text text-xl text-primary m-5">Name : {{ .Username }}</h2>
+      <h2 class="text text-xl text-primary m-5">Email : {{ .Email }}</h2>
       <div class="divider"></div>
-      {{ if gt (len .RequestedReturns) 0 }}
-      <div class="flex flex-row justify-between">
-        <h3 class="text text-slate-400 text-2xl">Requested returns</h3>
-        <button class="btn btn-accent approve-btn">Approve Selected</button>
-      </div>
-      <table class="table table-striped">
-        <thead>
-          <tr class="text text-blue-500 text-lg">
-            <th>Issue ID</th>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Issued Date</th>
-            <th>Return Date(exp.)</th>
-            <th>Requested Return</th>
-            <th>Select to approve</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{ range .RequestedReturns }}
-          <tr>
-            <td>{{ .Issue.Id }}</td>
-            <td class="flex flex-row gap-2">
-              {{ .Book.Title }}
-              <a href="/books/{{ .Book.Id }}">
-                <svg
-                  class="cursor-pointer"
-                  width="26px"
-                  height="26px"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g
-                    id="SVGRepo_tracerCarrier"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></g>
-                  <g id="SVGRepo_iconCarrier">
-                    <g id="Interface / External_Link">
-                      <path
-                        id="Vector"
-                        d="M10.0002 5H8.2002C7.08009 5 6.51962 5 6.0918 5.21799C5.71547 5.40973 5.40973 5.71547 5.21799 6.0918C5 6.51962 5 7.08009 5 8.2002V15.8002C5 16.9203 5 17.4801 5.21799 17.9079C5.40973 18.2842 5.71547 18.5905 6.0918 18.7822C6.5192 19 7.07899 19 8.19691 19H15.8031C16.921 19 17.48 19 17.9074 18.7822C18.2837 18.5905 18.5905 18.2839 18.7822 17.9076C19 17.4802 19 16.921 19 15.8031V14M20 9V4M20 4H15M20 4L13 11"
-                        stroke="#000000"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      ></path>
-                    </g>
-                  </g>
-                </svg>
-              </a>
-            </td>
-            <td>{{ .Book.Author }}</td>
-            <td>{{ .Issue.Issue_date }}</td>
-            <td>{{ .Issue.Expected_return_date }}</td>
-            <td>{{ .Issue.ReturnRequested }}</td>
-            <td>
-              <input
-                type="checkbox"
-                class="checkbox return-checkbox"
-                id="checkbox{{ .Issue.Id}}"
-                data-issue-id="{{ .Issue.Id }}"
-                data-book-id="{{ .Book.Id }}"
-              />
-            </td>
-            <td>
-              <form action="/api/admin/denyreturn/{{ .Issue.Id}}" method="post">
-                <button class="btn btn-secondary" type="submit">Deny</button>
-              </form>
-            </td>
-          </tr>
-
-          {{ end }}
-        </tbody>
-      </table>
-      {{ else }}
-      <p>No new Requests</p>
-      {{ end }} {{ if gt (len .RequestedIssues) 0 }}
-
-      <div class="divider"></div>
-      <div class="flex flex-row justify-between">
-        <h3 class="text text-slate-400 text-2xl">Requested issues</h3>
-        <button class="btn btn-accent approve-issue-btn">
-          Approve Selected
-        </button>
-      </div>
-      <table class="table table-striped">
-        <thead>
-          <tr class="text text-blue-500 text-lg">
-            <th>Issue ID</th>
-            <th>Username</th>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Quantity</th>
-            <th>Requested Issue</th>
-            <th>Select to approve</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{ range .RequestedIssues }}
-
-          <tr>
-            <td>{{ .Issue.Id }}</td>
-            <td>{{ .Username }}</td>
-            <td class="flex flex-row gap-2">
-              {{ .Book.Title }}
-              <a href="/books/{{ .Book.Id }}">
-                <svg
-                  class="cursor-pointer"
-                  width="26px"
-                  height="26px"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g
-                    id="SVGRepo_tracerCarrier"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></g>
-                  <g id="SVGRepo_iconCarrier">
-                    <g id="Interface / External_Link">
-                      <path
-                        id="Vector"
-                        d="M10.0002 5H8.2002C7.08009 5 6.51962 5 6.0918 5.21799C5.71547 5.40973 5.40973 5.71547 5.21799 6.0918C5 6.51962 5 7.08009 5 8.2002V15.8002C5 16.9203 5 17.4801 5.21799 17.9079C5.40973 18.2842 5.71547 18.5905 6.0918 18.7822C6.5192 19 7.07899 19 8.19691 19H15.8031C16.921 19 17.48 19 17.9074 18.7822C18.2837 18.5905 18.5905 18.2839 18.7822 17.9076C19 17.4802 19 16.921 19 15.8031V14M20 9V4M20 4H15M20 4L13 11"
-                        stroke="#000000"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      ></path>
-                    </g>
-                  </g>
-                </svg>
-              </a>
-            </td>
-            <td>{{ .Book.Author }}</td>
-            <td>{{ .Book.Quantity }}</td>
-
-            <td>{{ .Issue.IssueRequested}}</td>
-            <td>
-              <input
-                type="checkbox"
-                class="checkbox issue-checkbox"
-                id="checkbox{{ .Issue.Id}}"
-                data-issue-id="{{ .Issue.Id}}"
-                data-book-id="{{ .Book.Id }}"
-                data-book-quantity="{{ .Book.Quantity}}"
-              />
-            </td>
-            <td>
-              <form action="/api/admin/denyissue/{{ .Issue.Id}}" method="post">
-                <button class="btn btn-secondary" type="submit">Deny</button>
-              </form>
-            </td>
-          </tr>
-          {{ end }}
-        </tbody>
-      </table>
-      {{ end}}
-      <br />
-      <div class="divider"></div>
-      {{ if gt (len .RequestedAdmins) 0 }}
-      <div>
-        <div class="flex flex-row justify-between">
-          <h3 class="text text-slate-400 text-2xl">
-            Requested users to be Admin
-          </h3>
-          <button class="btn btn-accent approve-admin-btn">
-            Approve Selected
-          </button>
+      <div class="collapse collapse-arrow bg-base-200">
+        <input type="radio" name="my-accordion-2" checked="checked" />
+        <div class="collapse-title text text-slate-400 text-2xl">
+          Book Issues
         </div>
-        <table class="table table-striped">
-          <thead>
-            <tr class="text text-blue-500 text-lg">
-              <th>User ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Select to approve</th>
-            </tr>
-          </thead>
-          <tbody>
-            {{ range .RequestedAdmins }}
-            <tr>
-              <td class="text-lg">{{ .Id }}</td>
+        <div class="collapse-content">
+          {{ if gt (len .RequestedReturns) 0 }}
+          <div class="flex flex-row justify-between">
+            <h3 class="text text-slate-400 text-2xl">Requested returns</h3>
+            <button class="btn btn-accent approve-btn">Approve Selected</button>
+          </div>
+          <table class="table table-striped">
+            <thead>
+              <tr class="text text-blue-500 text-lg">
+                <th>Issue ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Issued Date</th>
+                <th>Return Date(exp.)</th>
+                <th>Requested Return</th>
+                <th>Select to approve</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{ range .RequestedReturns }}
+              <tr>
+                <td>{{ .Issue.Id }}</td>
+                <td class="flex flex-row gap-2">
+                  {{ .Book.Title }}
+                  <a href="/books/{{ .Book.Id }}">
+                    <svg
+                      class="cursor-pointer"
+                      width="26px"
+                      height="26px"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                      <g
+                        id="SVGRepo_tracerCarrier"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      ></g>
+                      <g id="SVGRepo_iconCarrier">
+                        <g id="Interface / External_Link">
+                          <path
+                            id="Vector"
+                            d="M10.0002 5H8.2002C7.08009 5 6.51962 5 6.0918 5.21799C5.71547 5.40973 5.40973 5.71547 5.21799 6.0918C5 6.51962 5 7.08009 5 8.2002V15.8002C5 16.9203 5 17.4801 5.21799 17.9079C5.40973 18.2842 5.71547 18.5905 6.0918 18.7822C6.5192 19 7.07899 19 8.19691 19H15.8031C16.921 19 17.48 19 17.9074 18.7822C18.2837 18.5905 18.5905 18.2839 18.7822 17.9076C19 17.4802 19 16.921 19 15.8031V14M20 9V4M20 4H15M20 4L13 11"
+                            stroke="#000000"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          ></path>
+                        </g>
+                      </g>
+                    </svg>
+                  </a>
+                </td>
+                <td>{{ .Book.Author }}</td>
+                <td>{{ .Issue.Issue_date }}</td>
+                <td>{{ .Issue.Expected_return_date }}</td>
+                <td>{{ .Issue.ReturnRequested }}</td>
+                <td>
+                  <input
+                    type="checkbox"
+                    class="checkbox return-checkbox"
+                    id="checkbox{{ .Issue.Id}}"
+                    data-issue-id="{{ .Issue.Id }}"
+                    data-book-id="{{ .Book.Id }}"
+                  />
+                </td>
+                <td>
+                  <form
+                    action="/api/admin/denyreturn/{{ .Issue.Id}}"
+                    method="post"
+                  >
+                    <button class="btn btn-secondary" type="submit">
+                      Deny
+                    </button>
+                  </form>
+                </td>
+              </tr>
 
-              <td class="text-lg">{{ .Username }}</td>
-              <td class="text-lg">{{ .Email }}</td>
+              {{ end }}
+            </tbody>
+          </table>
+          {{ else }}
+          <p>No new Requests</p>
+          {{ end }} {{ if gt (len .RequestedIssues) 0 }}
 
-              <td class="text-lg">
-                <input
-                  type="checkbox"
-                  class="checkbox admin-checkbox"
-                  id="checkbox{{ .Id}}"
-                  data-user-id="{{ .Id }}"
-                />
-              </td>
-              <td>
-                <form action="/api/admin/denyadmin/{{ .Id}}" method="post">
-                  <button class="btn btn-secondary" type="submit">Deny</button>
-                </form>
-              </td>
-            </tr>
-            {{ end }}
-          </tbody>
-        </table>
+          <div class="divider"></div>
+          <div class="flex flex-row justify-between">
+            <h3 class="text text-slate-400 text-2xl">Requested issues</h3>
+            <button class="btn btn-accent approve-issue-btn">
+              Approve Selected
+            </button>
+          </div>
+          <table class="table table-striped">
+            <thead>
+              <tr class="text text-blue-500 text-lg">
+                <th>Issue ID</th>
+                <th>Username</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Quantity</th>
+                <th>Requested Issue</th>
+                <th>Select to approve</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{ range .RequestedIssues }}
+
+              <tr>
+                <td>{{ .Issue.Id }}</td>
+                <td>{{ .Username }}</td>
+                <td class="flex flex-row gap-2">
+                  {{ .Book.Title }}
+                  <a href="/books/{{ .Book.Id }}">
+                    <svg
+                      class="cursor-pointer"
+                      width="26px"
+                      height="26px"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                      <g
+                        id="SVGRepo_tracerCarrier"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      ></g>
+                      <g id="SVGRepo_iconCarrier">
+                        <g id="Interface / External_Link">
+                          <path
+                            id="Vector"
+                            d="M10.0002 5H8.2002C7.08009 5 6.51962 5 6.0918 5.21799C5.71547 5.40973 5.40973 5.71547 5.21799 6.0918C5 6.51962 5 7.08009 5 8.2002V15.8002C5 16.9203 5 17.4801 5.21799 17.9079C5.40973 18.2842 5.71547 18.5905 6.0918 18.7822C6.5192 19 7.07899 19 8.19691 19H15.8031C16.921 19 17.48 19 17.9074 18.7822C18.2837 18.5905 18.5905 18.2839 18.7822 17.9076C19 17.4802 19 16.921 19 15.8031V14M20 9V4M20 4H15M20 4L13 11"
+                            stroke="#000000"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          ></path>
+                        </g>
+                      </g>
+                    </svg>
+                  </a>
+                </td>
+                <td>{{ .Book.Author }}</td>
+                <td>{{ .Book.Quantity }}</td>
+
+                <td>{{ .Issue.IssueRequested}}</td>
+                <td>
+                  <input
+                    type="checkbox"
+                    class="checkbox issue-checkbox"
+                    id="checkbox{{ .Issue.Id}}"
+                    data-issue-id="{{ .Issue.Id}}"
+                    data-book-id="{{ .Book.Id }}"
+                    data-book-quantity="{{ .Book.Quantity}}"
+                  />
+                </td>
+                <td>
+                  <form
+                    action="/api/admin/denyissue/{{ .Issue.Id}}"
+                    method="post"
+                  >
+                    <button class="btn btn-secondary" type="submit">
+                      Deny
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {{ end }}
+            </tbody>
+          </table>
+          {{ end}}
+        </div>
       </div>
+
       <br />
-      <div class="divider"></div>
-      {{ end }}
+      <div class="collapse collapse-arrow bg-base-200">
+        <input type="radio" name="my-accordion-2" checked="checked" />
+        <div class="collapse-title text text-slate-400 text-2xl">
+          Admin Requests
+        </div>
+        <div class="collapse-content">
+          {{ if gt (len .RequestedAdmins) 0 }}
+          <div>
+            <div class="flex flex-row justify-between">
+              <h3 class="text text-slate-400 text-2xl">
+                Requested users to be Admin
+              </h3>
+              <button class="btn btn-accent approve-admin-btn">
+                Approve Selected
+              </button>
+            </div>
+            <table class="table table-striped">
+              <thead>
+                <tr class="text text-blue-500 text-lg">
+                  <th>User ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Select to approve</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{ range .RequestedAdmins }}
+                <tr>
+                  <td class="text-lg">{{ .Id }}</td>
+
+                  <td class="text-lg">{{ .Username }}</td>
+                  <td class="text-lg">{{ .Email }}</td>
+
+                  <td class="text-lg">
+                    <input
+                      type="checkbox"
+                      class="checkbox admin-checkbox"
+                      id="checkbox{{ .Id}}"
+                      data-user-id="{{ .Id }}"
+                    />
+                  </td>
+                  <td>
+                    <form action="/api/admin/denyadmin/{{ .Id}}" method="post">
+                      <button class="btn btn-secondary" type="submit">
+                        Deny
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {{ else }}
+        <div>No requests</div>
+        {{end}}
+      </div>
     </div>
+    <div class="divider"></div>
+
     <button class="btn addBookModal" onclick="addBookModal.showModal()">
       Add a new Book
     </button>
@@ -341,12 +370,18 @@
               </select>
             </div>
           </div>
-          <div class="flex items-center w-full justify-end flex-row" style="justify-content: flex-end">
-            <button class="btn btn-primary addbook mt-4" type="submit" id="addbook">
+          <div
+            class="flex items-center w-full justify-end flex-row"
+            style="justify-content: flex-end"
+          >
+            <button
+              class="btn btn-primary addbook mt-4"
+              type="submit"
+              id="addbook"
+            >
               Add
             </button>
           </div>
-          
         </form>
       </div>
     </dialog>
