@@ -254,7 +254,6 @@ func DenyIssueRequest(id int, denyType string) error {
 }
 
 func BalanceIssues(userIds []string) error {
-	// get issues of that user :
 	var issues []types.IssueWithDetails
 	for _, value := range userIds {
 		id, err := strconv.ParseInt(value, 10, 64)

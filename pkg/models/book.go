@@ -1,7 +1,6 @@
 package models
 
 import (
-	"database/sql"
 	"fmt"
 	"strconv"
 	"strings"
@@ -53,9 +52,7 @@ func GetBook(bookId string) (*types.Book, error) {
 	var publication_date *time.Time
 	err = row.Scan(&book.Id, &book.Title, &book.Author, &publication_date, &book.Quantity, &book.Genre, &book.Description, &book.Rating, &book.Address)
 	if err != nil {
-		if err.Error() == sql.ErrNoRows.Error() {
-			fmt.Print("looo")
-		}
+		fmt.Println(err.Error())
 		return nil, err
 	}
 	book.PublicationDate = publication_date.Format(utils.LAYOUT)
@@ -183,7 +180,6 @@ func UpdatebooksQuantity(payload *types.RequestPayload, increase bool) error {
 	}
 	keyString = strings.Trim(keyString, ",")
 	query += fmt.Sprintf(` ELSE (quantity) END ) WHERE id IN (%s)`, keyString)
-	fmt.Println("admin:", query)
 	db, err := config.DbConnection()
 	if err != nil {
 		return fmt.Errorf("error connecting to Db: %w", err)

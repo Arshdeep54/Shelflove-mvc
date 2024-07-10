@@ -6,7 +6,6 @@ import (
 
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/controllers"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/middlewares"
-	// "github.com/gorilla/mux"
 )
 
 func Start() {

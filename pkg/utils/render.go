@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -33,7 +32,6 @@ func UpdateHeaders(w http.ResponseWriter, Data *types.RenderData) error {
 	if len(strings.Split(w.Header().Get("isIssued"), "")) > 0 {
 		isIssued, err := strconv.ParseBool(w.Header().Get("isIssued"))
 		Data.IsIssued = isIssued
-		fmt.Println(Data.IsIssued, w.Header().Get("isIssued"), w.Header().Get("issueRequested"), w.Header().Get("isReturnRequested"))
 		if err != nil {
 			return err
 		}

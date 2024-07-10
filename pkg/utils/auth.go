@@ -10,7 +10,6 @@ import (
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/types"
 	"github.com/golang-jwt/jwt"
 
-	// "github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -45,7 +44,6 @@ func JwtToken(payload types.JwtPayload) (string, error) {
 	})
 	tokenString, err := token.SignedString([]byte(jwtSecret))
 	if err != nil {
-		fmt.Print("here...")
 		return "", err
 	}
 	return tokenString, nil

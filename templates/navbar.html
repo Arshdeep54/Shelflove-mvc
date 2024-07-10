@@ -5,7 +5,7 @@
   >
     <a
       href="/"
-      class="flex flex-row items-center text-2xl font-semibold text-gray-900 dark:text-white"
+      class="flex flex-row items-center text-2xl font-semibold textCustomWhite text-white"
     >
       Shelf<span class="text-red-500">love</span>
     </a>
@@ -46,14 +46,14 @@
 
           <a
             href="/"
-            class="block py-2 px-3  rounded bg-transparent text-blue-700 md:p-0 text-blue-500"
+            class="block py-2 px-3 rounded bg-transparent text-blue-700 md:p-0 text-blue-500"
             aria-current="page"
             >Home</a
           >
           {{else}}
           <a
             href="/"
-            class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent  md:p-0 "
+            class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:p-0"
             aria-current="page"
             >Home</a
           >
@@ -63,13 +63,13 @@
           {{ if .BooksActive}}
           <a
             href="/books"
-            class="block py-2 px-3  rounded bg-transparent text-blue-700 md:p-0 text-blue-500"
+            class="block py-2 px-3 rounded bg-transparent text-blue-700 md:p-0 text-blue-500"
             >Books</a
           >
           {{else}}
           <a
             href="/books"
-            class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent  md:p-0"
+            class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:p-0"
             >Books</a
           >
           {{end}}
