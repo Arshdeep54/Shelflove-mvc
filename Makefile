@@ -47,6 +47,7 @@ test:
 host:
 	@echo "Hosting on apache server"
 	@chmod +x ./host.sh
+	@make build 
 	@bash host.sh --sudo
 install:
 	@echo "Installing dependencies..."
