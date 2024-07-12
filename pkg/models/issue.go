@@ -20,8 +20,7 @@ func GetIssue(bookId string, userId int) (*types.Issue, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to Db: %w", err)
 	}
-	query := `SELECT id, isReturned,returnRequested,issueRequested FROM issue WHERE book_id = ? AND user_id = ? and isReturned=false `
-	row := db.QueryRow(query, int(id), userId)
+	row := db.Table("issues").Select("id", "isReturned", "returnRequested", "issueRequested").Where("book_id = ? AND user_id = ? and isReturned=false ", int(id), userId).Row()
 	if row.Err() != nil {
 		return nil, row.Err()
 	}
@@ -30,7 +29,10 @@ func GetIssue(bookId string, userId int) (*types.Issue, error) {
 	if err != nil {
 		return nil, err
 	}
-	db.Close()
+	err = config.CloseConnection(db)
+	if err != nil {
+		return nil, err
+	}
 	return &issue, nil
 }
 
@@ -86,7 +88,10 @@ func GetRequestedAll() ([]types.IssueWithDetails, []types.IssueWithDetails, erro
 			requestedIssues = append(requestedIssues, result)
 		}
 	}
-	db.Close()
+	err = config.CloseConnection(db)
+	if err != nil {
+		return nil, nil, err
+	}
 	return requestedReturns, requestedIssues, nil
 }
 
@@ -102,7 +107,10 @@ func ExistingIssueCount(userId int) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("error connecting to Db: %w", err)
 	}
-	db.Close()
+	err = config.CloseConnection(db)
+	if err != nil {
+		return 0, err
+	}
 	return count, nil
 }
 func AddNewIssue(userID int, bookId int) error {
@@ -115,7 +123,10 @@ func AddNewIssue(userID int, bookId int) error {
 	if err != nil {
 		return err
 	}
-	db.Close()
+	err = config.CloseConnection(db)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 func ReturnRequest(userID int, bookId int) error {
@@ -137,7 +148,10 @@ func ReturnRequest(userID int, bookId int) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("issue Not Found")
 	}
-	db.Close()
+	err = config.CloseConnection(db)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 func GetUserIssues(userId int) ([]types.IssueWithDetails, error) {
@@ -185,8 +199,11 @@ func GetUserIssues(userId int) ([]types.IssueWithDetails, error) {
 		requests = append(
 			requests, request)
 	}
-	db.Close()
-	return requests, nil
+	err = config.CloseConnection(db)
+	if err != nil {
+		return nil,err
+	}
+		return requests, nil
 }
 
 func UpdateIssue(issueIds []string, updateType string) error {
@@ -222,8 +239,11 @@ func UpdateIssue(issueIds []string, updateType string) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("no Updation")
 	}
-	db.Close()
-	return nil
+	err = config.CloseConnection(db)
+	if err != nil {
+		return err
+	}
+		return nil
 }
 
 func DenyIssueRequest(id int, denyType string) error {
@@ -248,8 +268,11 @@ func DenyIssueRequest(id int, denyType string) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("no Updation")
 	}
-	db.Close()
-	return nil
+	err = config.CloseConnection(db)
+	if err != nil {
+		return err
+	}
+		return nil
 
 }
 

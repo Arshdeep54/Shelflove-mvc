@@ -4,11 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
-
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/config"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/types"
-	"github.com/Arshdeep54/Shelflove-mvc/pkg/utils"
 )
 
 func GetAllBooks() ([]types.Book, error) {
@@ -17,7 +14,8 @@ func GetAllBooks() ([]types.Book, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to Db: %w", err)
 	}
-	rows, err := db.Query(`SELECT * FROM book WHERE quantity >=0 ORDER BY quantity DESC;`)
+	// rows, err := db.Query(`SELECT * FROM book WHERE quantity >=0 ORDER BY quantity DESC;`)
+	rows, err := db.Table("books").Where("quantity >=0").Order("quantity desc").Rows()
 	if err != nil {
 		return nil, fmt.Errorf("error querying books: %w", err)
 	}
@@ -34,7 +32,10 @@ func GetAllBooks() ([]types.Book, error) {
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error iterating over rows: %w", err)
 	}
-	db.Close()
+	err = config.CloseConnection(db)
+	if err != nil {
+		return nil, err
+	}
 	return books, nil
 }
 func GetBook(bookId string) (*types.Book, error) {
@@ -46,17 +47,17 @@ func GetBook(bookId string) (*types.Book, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to Db: %w", err)
 	}
-	query := `SELECT * FROM book WHERE id = ? `
-	row := db.QueryRow(query, id)
 	var book types.Book
-	var publication_date *time.Time
-	err = row.Scan(&book.Id, &book.Title, &book.Author, &publication_date, &book.Quantity, &book.Genre, &book.Description, &book.Rating, &book.Address)
-	if err != nil {
+	tx := db.First(&book, "id=?", id)
+
+	if tx.Error != nil {
 		fmt.Println(err.Error())
 		return nil, err
 	}
-	book.PublicationDate = publication_date.Format(utils.LAYOUT)
-	db.Close()
+	err = config.CloseConnection(db)
+	if err != nil {
+		return nil, err
+	}
 	return &book, nil
 }
 

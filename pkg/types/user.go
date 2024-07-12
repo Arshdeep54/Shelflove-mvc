@@ -1,9 +1,9 @@
 package types
 
 type User struct {
-	Id           int32  `json:"id"`
-	Username     string `json:"username"`
-	Email        string `json:"email"`
+	Id           int32  `json:"id" gorm:"primaryKey"`
+	Username     string `json:"username" gorm:"unique"`
+	Email        string `json:"email" gorm:"unique"`
 	Password     string `json:"password"`
 	IsAdmin      bool   `json:"isAdmin"`
 	AdminRequest bool   `json:"adminRequest"`

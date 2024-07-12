@@ -4,8 +4,8 @@ import "time"
 
 type Issue struct {
 	Id                   int
-	User_id              int
-	Book_id              int
+	User_id              int32
+	Book_id              int32
 	Issue_date           *time.Time
 	Expected_return_date *time.Time
 	Returned_date        *time.Time
@@ -13,6 +13,8 @@ type Issue struct {
 	ReturnRequested      bool `default:"false"`
 	IssueRequested       bool `default:"false"`
 	Fine                 int  `default:"0"`
+	User                 User `gorm:"foreignKey:User_id;references:Id"`
+	Book                 Book `gorm:"foreignKey:Book_id;references:Id"`
 }
 type IssueRender struct {
 	Id                   int

@@ -1,109 +1,64 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
+	"github.com/Arshdeep54/Shelflove-mvc/pkg/config"
+	"github.com/Arshdeep54/Shelflove-mvc/pkg/types"
+	"github.com/Arshdeep54/Shelflove-mvc/pkg/utils"
 	"log"
 	"os"
 
-	"github.com/Arshdeep54/Shelflove-mvc/pkg/config"
-	"github.com/Arshdeep54/Shelflove-mvc/pkg/utils"
-	"github.com/joho/godotenv"
+	"gorm.io/gorm"
 )
 
-func main()  {
+func main() {
 	fmt.Println("Initillising Mysql database ")
-    db,err:=config.DbConnection()
+	db, err := config.DbConnection()
 	if err != nil {
-        fmt.Println("%w", err)
+		fmt.Println("%w", err)
 		os.Exit(1)
-        return
-    }
-	exists, err := dbExists(db)
-    if err != nil {
-        fmt.Println("error checking database existence: %w", err)
-		return 
-    }
-	if !exists {
-        _, err = config.Db.Exec("CREATE DATABASE shelflove;") 
-        if err != nil {
-            fmt.Println("error creating database: %w", err)
-			return 
-        }
-        fmt.Println("Database created successfully")
-    } else {
-        fmt.Println("Database already exists")
-    }
-	cleandbFlag := os.Getenv("CLEANDB")
-    if cleandbFlag == "true" {
-        fmt.Println("Cleaning database...")
-        err := cleanDB(db)
-        if err != nil {
-            log.Fatal(err)
-        }
-        fmt.Println("Database cleaned successfully")
-        return
-    }
-	
-    if err := migrateTables(db); err != nil {
-        log.Fatal(err)
-    }
-	if err := migrateDummyData(db); err != nil {
-        log.Fatal(err)
-    }
-    fmt.Println("Migrations completed.")
-}
-func dbExists(Db *sql.DB) (bool, error) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+		return
 	}
-    dbName := os.Getenv("MYSQL_DATABASE")
-    query := `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?;`
-    row := Db.QueryRow(query, dbName)
-    var schemaName string
-    err = row.Scan(&schemaName)
-    if err != nil && err != sql.ErrNoRows {
-		return false, fmt.Errorf("error checking database existence: %w", err)
-    }
-    return schemaName == dbName, nil 
+
+	cleandbFlag := os.Getenv("CLEANDB")
+	if cleandbFlag == "true" {
+		fmt.Println("Cleaning database...")
+		err := cleanDB(db)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Database cleaned successfully")
+		return
+	}
+
+	if err := migrateTables(db); err != nil {
+		log.Fatal(err)
+	}
+	if err := MigrateDummyData(db); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Migrations completed.")
 }
 
-func migrateTables(db *sql.DB) error {
-    _, err := db.Exec(utils.Create_User_Table)
-    if err != nil {
-        return fmt.Errorf("error creating user table: %w", err)
-    }
-	_, err = db.Exec(utils.Create_Book_Table)
-    if err != nil {
-        return fmt.Errorf("error creating book table: %w", err)
-    }
-	_, err = db.Exec(utils.Create_Issue_Table)
-    if err != nil {
-        return fmt.Errorf("error creating issue table: %w", err)
-    }
-    return nil
+func migrateTables(db *gorm.DB) error {
+	err := db.AutoMigrate(&types.User{}, &types.Book{}, &types.Issue{})
+	if err != nil {
+		return fmt.Errorf("error creating user table: %w", err)
+	}
+	return nil
 
 }
-func migrateDummyData(db *sql.DB) error {
-	_, err := db.Exec(utils.Add_Dummy_Books)
-    if err != nil {
-        return fmt.Errorf("error adding dummy books data: %w", err)
-    }
+func MigrateDummyData(db *gorm.DB) error {
+	books := utils.GetDummyBooks()
+	tx := db.Create(&books)
+	if tx.Error != nil {
+		return fmt.Errorf("error adding dummy books data: %w", tx.Error)
+	}
 	return nil
 }
-func cleanDB(db *sql.DB) error {
-    _, err := db.Exec("DROP TABLE issue;")
-    if err != nil {
-        return err
-    }
-    _, err = db.Exec("DROP TABLE book;")
-    if err != nil {
-        return err
-    }
-    _, err = db.Exec("DROP TABLE user;")
-    if err != nil {
-        return err
-    }
-    return nil
+func cleanDB(db *gorm.DB) error {
+	db.Migrator().DropTable(&types.User{})
+	db.Migrator().DropTable(&types.Book{})
+	db.Migrator().DropTable(&types.Issue{})
+	return nil
 }
