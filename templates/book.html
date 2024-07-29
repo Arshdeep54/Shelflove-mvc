@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shelflove</title>
     <link type="text/css" href="/static/style.css" rel="stylesheet" />
-    </head>
+  </head>
   <body>
     {{ template "navbar" . }}
 
@@ -25,27 +25,23 @@
           <p><span class="text-primary">Rating: </span>{{ .Book.Rating }}</p>
           <p>
             <span class="text-primary">Quantity:</span>
-            {{ with .Book.Quantity }} {{ if eq . 0 }}
+            {{ if eq .Book.Quantity 0 }}
             <span class="text-accent">Not Available</span>
-            {{ else if eq . -1 }}
+            {{ else if eq .Book.Quantity -1 }}
             <span class="text-red-500">DELETED</span>
-            {{ else }} {{ . }} {{ end }} {{ end }}
+            {{ else }} {{ .Book.Quantity }} {{ end }}
           </p>
           <p><span class="text-primary">Genre:</span> {{ .Book.Genre }}</p>
           <p><span class="text-primary">Address:</span> {{ .Book.Address }}</p>
         </div>
         <div class="flex flex-row gap-5 m-5">
-          {{ if .IsLoggedIn }} {{ if ne .IsAdmin true}} 
-          {{ if or .IssueRequested .IsIssued}} 
-          
-          {{ if .IssueRequested }}
+          {{ if .IsLoggedIn }} {{ if ne .IsAdmin true}} {{ if or .IssueRequested
+          .IsIssued}} {{ if .IssueRequested }}
           <button type="submit" class="btn btn-warning" disabled>
             Issue Requested
           </button>
           {{ else }}
-          <button type="submit" class="btn btn-warning" disabled>
-            Issued
-          </button>
+          <button type="submit" class="btn btn-warning" disabled>Issued</button>
           {{end}}
 
           <form action="/api/user/return/" method="post" id="requestForm">
@@ -102,7 +98,7 @@
       </div>
     </section>
 
-    {{ if .IsAdmin }} {{ if gt .Book.Quantity 0}}
+    {{ if .IsAdmin }} {{ if gt .Book.Quantity -1}}
     <div class="flex flex-row gap-5 m-5">
       <button
         class="btn btn-primary"
@@ -208,10 +204,14 @@
                 <input
                   type="number"
                   name="quantity"
+                  min="0"
                   value="{{ .Book.Quantity }}"
+                  id="positiveQuantityInput"
                   class="input input-bordered w-full max-w-xs my-3 mx-3"
                   placeholder="Enter how many books to enter"
+                  required
                 />
+                <p class="text-red-500" id="errorQuant"></p>
               </div>
               <div>
                 <label class="text-xl" for="rating">Rating</label>
@@ -285,6 +285,30 @@
 
       updateBookButton.addEventListener("click", () => {
         updatebookForm.submit();
+      });
+    </script>
+    <script>
+      const numberInput = document.getElementById("positiveQuantityInput");
+      const errorQuant = document.getElementById("errorQuant");
+
+      numberInput.addEventListener("keypress", function (event) {
+        if (event.key === "Backspace" || event.key === "Delete") {
+          errorQuant.innerHTML = " ";
+          return;
+        }
+
+        const isNumber = !isNaN(event.key) && event.key !== ".";
+
+        if (!isNumber) {
+          event.preventDefault();
+          errorQuant.innerHTML = `Can't add negative or decimal number`;
+        } else if (
+          event.key === "Backspace" ||
+          event.key === "Delete" ||
+          isNumber
+        ) {
+          errorQuant.innerHTML = " ";
+        }
       });
     </script>
   </body>
