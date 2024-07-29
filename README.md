@@ -3,7 +3,7 @@
 ## Setup  
 - open a your development folder
 - ```wget https://raw.githubusercontent.com/Arshdeep54/Shelflove-mvc/main/setup.sh``` 
-- ```chmod +x host.sh #To change execution permission```
+- ```chmod +x setup.sh #To change execution permission```
 - ```./setup.sh```
 
 ### Install air 
