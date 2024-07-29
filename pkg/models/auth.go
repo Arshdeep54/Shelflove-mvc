@@ -1,23 +1,26 @@
 package models
 
 import (
+	// "fmt"
+
+	// "strings"
+
 	"fmt"
-	"gorm.io/gorm"
-	"strings"
 
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/config"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/types"
+	"gorm.io/gorm"
+	// "github.com/Arshdeep54/Shelflove-mvc/pkg/types"
 )
 
 func AddNewUser(user *types.RegisterUserPayload) error {
-	query := `INSERT INTO user (username, email, password) VALUES (?, ?, ?)`
 	db, err := config.DbConnection()
 	if err != nil {
 		return err
 	}
-
-	_, err = db.Exec(query, user.Username, user.Email, user.Password)
-	if err != nil {
+	tx := db.Create(&types.User{
+		Username: user.Username, Email: user.Email, Password: user.Password})
+	if tx.Error != nil {
 		return err
 	}
 	err = createFirstUserAdmin(db)
@@ -31,17 +34,15 @@ func AddNewUser(user *types.RegisterUserPayload) error {
 	return nil
 }
 func GetUserbyUserName(username string) (*types.User, error) {
-	query := `SELECT * FROM user WHERE username = ?`
 	db, err := config.DbConnection()
 	if err != nil {
 		return nil, err
 	}
 
-	row := db.QueryRow(query, username)
-
 	var user types.User
-	err = row.Scan(&user.Id, &user.Username, &user.Email, &user.Password, &user.IsAdmin, &user.AdminRequest)
-	if err != nil {
+	tx := db.Model(&types.User{}).Where("username = ?", username).Scan(&user)
+
+	if tx.Error != nil {
 		return nil, err
 	}
 	err = config.CloseConnection(db)
@@ -56,7 +57,7 @@ func IsAdmin(userId int) (bool, error) {
 		return false, err
 	}
 	var isAdmin bool
-	tx := db.Table("users").Select("isAdmin").Where("id = ?", userId).Scan(&isAdmin)
+	tx := db.Table("users").Select("is_admin").Where("id = ?", userId).Scan(&isAdmin)
 	if tx.Error != nil {
 		return false, err
 	}
@@ -66,13 +67,13 @@ func IsAdmin(userId int) (bool, error) {
 	}
 	return isAdmin, nil
 }
+
 func createFirstUserAdmin(db *gorm.DB) error {
-	query := `UPDATE user SET isAdmin=true WHERE id=1`
-	_, err := db.Exec(query)
-	if err != nil {
-		return err
+	result := db.Model(&types.User{}).Where("id = 1 ").Update("is_admin", 1)
+	if result.Error != nil {
+		return result.Error
 	}
-	err = config.CloseConnection(db)
+	err := config.CloseConnection(db)
 	if err != nil {
 		return err
 	}
@@ -84,12 +85,7 @@ func GetAdminRequest() ([]types.AdminRequest, error) {
 		return nil, fmt.Errorf("error connecting to Db: %w", err)
 	}
 	var adminRequests []types.AdminRequest
-	query := `
-      SELECT u.id AS userId, u.username, u.email
-      FROM user u
-      WHERE adminRequest = TRUE
-    `
-	rows, err := db.Query(query)
+	rows, err := db.Model(&types.User{}).Select("id", "username", "email").Where("admin_request = TRUE").Rows()
 	if err != nil {
 		return nil, fmt.Errorf("error querying admin request: %w", err)
 	}
@@ -108,23 +104,17 @@ func GetAdminRequest() ([]types.AdminRequest, error) {
 	}
 	return adminRequests, nil
 }
+
 func AdminRequest(userId int) error {
-	query := `UPDATE user SET adminRequest = TRUE WHERE id=?`
 	db, err := config.DbConnection()
 	if err != nil {
 		return err
 	}
-	result, err := db.Exec(query, userId)
-	if err != nil {
-		return err
+	result := db.Model(&types.User{}).Where("id=?", userId).Update("admin_request", bool(true))
+	if result.Error != nil {
+		return result.Error
 	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("error Updating")
-	}
+
 	err = config.CloseConnection(db)
 	if err != nil {
 		return err
@@ -137,11 +127,11 @@ func AdminRequestSent(userId int) (bool, error) {
 		return false, err
 	}
 	type AdminRequestSent struct {
-		id      int
+		Id      int
 		request bool
 	}
 	payload := &AdminRequestSent{}
-	tx := db.Table("users").Select("id", "adminRequest").Where("id=?", userId).Scan(&payload)
+	tx := db.Table("users").Select("id", "admin_request").Where("id=?", userId).Scan(&payload)
 	if tx.Error != nil {
 		return false, err
 	}
@@ -152,55 +142,55 @@ func AdminRequestSent(userId int) (bool, error) {
 	return payload.request, nil
 }
 
-func ApproveAdmin(userIds []string) error {
-	var keyString string
-	for _, key := range userIds {
-		keyString += key
-		keyString += ","
-	}
-	keyString = strings.Trim(keyString, ",")
-	query := fmt.Sprintf(`UPDATE user SET adminRequest = FALSE, isAdmin = TRUE WHERE id IN (%s)`, keyString)
-	db, err := config.DbConnection()
-	if err != nil {
-		return err
-	}
-	result, err := db.Exec(query)
-	if err != nil {
-		return err
-	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("error Updating")
-	}
-	err = config.CloseConnection(db)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func DenyAdminRequest(userId int) error {
-	query := `UPDATE user SET adminRequest= false WHERE id= ?`
-	db, err := config.DbConnection()
-	if err != nil {
-		return err
-	}
-	result, err := db.Exec(query, userId)
-	if err != nil {
-		return err
-	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("error Updating")
-	}
-	err = config.CloseConnection(db)
-	if err != nil {
-		return err
-	}
-	return nil
-}
+// func ApproveAdmin(userIds []string) error {
+// 	var keyString string
+// 	for _, key := range userIds {
+// 		keyString += key
+// 		keyString += ","
+// 	}
+// 	keyString = strings.Trim(keyString, ",")
+// 	query := fmt.Sprintf(`UPDATE user SET adminRequest = FALSE, isAdmin = TRUE WHERE id IN (%s)`, keyString)
+// 	db, err := config.DbConnection()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	result, err := db.Exec(query)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	rowsAffected, err := result.RowsAffected()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if rowsAffected == 0 {
+// 		return fmt.Errorf("error Updating")
+// 	}
+// 	err = config.CloseConnection(db)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
+// func DenyAdminRequest(userId int) error {
+// 	query := `UPDATE user SET adminRequest= false WHERE id= ?`
+// 	db, err := config.DbConnection()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	result, err := db.Exec(query, userId)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	rowsAffected, err := result.RowsAffected()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if rowsAffected == 0 {
+// 		return fmt.Errorf("error Updating")
+// 	}
+// 	err = config.CloseConnection(db)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }

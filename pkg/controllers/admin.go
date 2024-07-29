@@ -76,19 +76,19 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/books/%d", id), http.StatusSeeOther)
 }
 
-func DeleteBook(w http.ResponseWriter, r *http.Request) {
-	bookId := r.PathValue("bookId")
-	id, err := strconv.ParseInt(bookId, 10, 64)
-	if err != nil {
-		fmt.Println("Error parsing to int")
-		return
-	}
-	err = models.DeleteBook(id)
-	if err != nil {
-		fmt.Println("Error parsing to int", err)
-		return
-	}
-	http.Redirect(w, r, "/books", http.StatusSeeOther)
-}
+// func DeleteBook(w http.ResponseWriter, r *http.Request) {
+// 	bookId := r.PathValue("bookId")
+// 	id, err := strconv.ParseInt(bookId, 10, 64)
+// 	if err != nil {
+// 		fmt.Println("Error parsing to int")
+// 		return
+// 	}
+// 	err = models.DeleteBook(id)
+// 	if err != nil {
+// 		fmt.Println("Error parsing to int", err)
+// 		return
+// 	}
+// 	http.Redirect(w, r, "/books", http.StatusSeeOther)
+// }
 
 

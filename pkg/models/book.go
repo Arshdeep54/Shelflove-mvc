@@ -2,10 +2,10 @@ package models
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/config"
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/types"
+	"strconv"
+	"strings"
 )
 
 func GetAllBooks() ([]types.Book, error) {
@@ -51,7 +51,7 @@ func GetBook(bookId string) (*types.Book, error) {
 	tx := db.First(&book, "id=?", id)
 
 	if tx.Error != nil {
-		fmt.Println(err.Error())
+		fmt.Println(tx.Error)
 		return nil, err
 	}
 	err = config.CloseConnection(db)
@@ -66,83 +66,76 @@ func AddNewBook(book *types.Book) error {
 	if err != nil {
 		return fmt.Errorf("error connecting to Db: %w", err)
 	}
-	query := `
-        INSERT INTO book ( title, author, description, quantity ,genre,publication_date,rating, address)
-        VALUES (?, ?, ?, ?,?,?,?,?)
-      `
-	_, err = db.Exec(query, book.Title, book.Author, book.Description, book.Quantity, book.Genre, book.PublicationDate, book.Rating, book.Address)
+	tx := db.Model(&types.Book{}).Create(&book)
+	if tx.Error != nil {
+		return err
+	}
+	err = config.CloseConnection(db)
 	if err != nil {
 		return err
 	}
-	db.Close()
 	return nil
 }
+
 func Updatebook(book *types.Book, id int) error {
-	query := `UPDATE book
-        SET title = COALESCE(?, title),
-            author = COALESCE(?, author),
-            description = COALESCE(?, description),
-            quantity = COALESCE(?, quantity),
-            publication_date = COALESCE(?, publication_date),
-            rating = COALESCE(?, rating),
-            genre = COALESCE(?, genre),
-            address = COALESCE(?, address)
-        WHERE id = ?;`
 	db, err := config.DbConnection()
 	if err != nil {
 		return fmt.Errorf("error connecting to Db: %w", err)
 	}
-	result, err := db.Exec(query, book.Title, book.Author, book.Description, book.Quantity, book.PublicationDate, book.Rating, book.Genre, book.Address, id)
+	tx := db.Model(types.Book{}).Save(&types.Book{
+		Id:              int32(id),
+		Title:           book.Title,
+		Author:          book.Author,
+		Description:     book.Description,
+		Quantity:        book.Quantity,
+		PublicationDate: book.PublicationDate,
+		Rating:          book.Rating,
+		Genre:           book.Genre,
+		Address:         book.Address})
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	err = config.CloseConnection(db)
 	if err != nil {
 		return err
 	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("book Not Found")
-	}
-	db.Close()
 	return nil
 }
+
 func DeleteBook(id int64) error {
-	query := `UPDATE book SET quantity = -1 WHERE id= ? ;`
 	db, err := config.DbConnection()
 	if err != nil {
 		return fmt.Errorf("error connecting to Db: %w", err)
 	}
-	result, err := db.Exec(query, id)
+	tx := db.Model(&types.Book{}).Where("id=?", id).Update("quantity", -1)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	err = config.CloseConnection(db)
 	if err != nil {
 		return err
 	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("book Not Found")
-	}
-	db.Close()
 	return nil
 }
+
 func IssuedBookCount(id int64) (int, error) {
 	db, err := config.DbConnection()
 	if err != nil {
 		return 0, fmt.Errorf("error connecting to Db: %w", err)
 	}
-	query := `
-    SELECT Count(book_id)
-    FROM issue
-    WHERE book_id = ? and isReturned=false and issueRequested=false
-  `
-	row := db.QueryRow(query, id)
+
+	row := db.Model(&types.Issue{}).Where("book_id = ? and is_returned=false and issue_requested=false", id).Select("Count(book_id)").Row()
 	var count int
 	err = row.Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("error scaning: %w", err)
 	}
-	db.Close()
+	err = config.CloseConnection(db)
+	if err != nil {
+		return 0,err
+	}
 	return count, nil
 }
 func BookCount(id int64) (int, error) {
@@ -150,19 +143,19 @@ func BookCount(id int64) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("error connecting to Db: %w", err)
 	}
-	query := ` SELECT id, quantity
-        FROM book
-        WHERE id = ?
-      `
-	row := db.QueryRow(query, id)
+	row := db.Model(&types.Book{}).Select("id", "quantity").Where("id = ?", id).Row()
 	var userid, count int
 	err = row.Scan(&userid, &count)
 	if err != nil {
 		return 0, fmt.Errorf("error scaning: %w", err)
 	}
-	db.Close()
+	err = config.CloseConnection(db)
+	if err != nil {
+		return 0, err
+	}
 	return count, nil
 }
+
 func UpdatebooksQuantity(payload *types.RequestPayload, increase bool) error {
 	var sign string
 	if increase {
@@ -186,19 +179,15 @@ func UpdatebooksQuantity(payload *types.RequestPayload, increase bool) error {
 		return fmt.Errorf("error connecting to Db: %w", err)
 	}
 
-	result, err := db.Exec(query)
-	if err != nil {
-		return err
-	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
+	rowsAffected := db.Raw(query).RowsAffected
 	if rowsAffected == 0 {
 		fmt.Println("no updation")
 		return fmt.Errorf("no Updation")
 	}
-	db.Close()
+	err = config.CloseConnection(db)
+	if err != nil {
+		return err
+	}
 	return nil
 
 }
@@ -208,17 +197,15 @@ func BookStatus(title string) (int, bool, error) {
 	if err != nil {
 		return 0, false, fmt.Errorf("error connecting to Db: %w", err)
 	}
-	query := ` SELECT id
-        FROM book
-        WHERE title = ?
-		LIMIT 1;
-      `
-	row := db.QueryRow(query, title)
+	row := db.Model(&types.Book{}).Where("title=?", title).Select("id").Row()
 	var bookid int
 	err = row.Scan(&bookid)
 	if err != nil {
 		return 0, false, nil
 	}
-	db.Close()
+	err = config.CloseConnection(db)
+	if err != nil {
+		return 0, false, err
+	}
 	return bookid, true, nil
 }

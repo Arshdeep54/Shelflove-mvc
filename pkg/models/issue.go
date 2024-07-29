@@ -3,7 +3,7 @@ package models
 import (
 	"fmt"
 	"strconv"
-	"strings"
+	// "strings"
 	"time"
 
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/config"
@@ -20,7 +20,7 @@ func GetIssue(bookId string, userId int) (*types.Issue, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to Db: %w", err)
 	}
-	row := db.Table("issues").Select("id", "isReturned", "returnRequested", "issueRequested").Where("book_id = ? AND user_id = ? and isReturned=false ", int(id), userId).Row()
+	row := db.Table("issues").Select("id", "is_returned", "return_requested", "issue_requested").Where("book_id = ? AND user_id = ? and is_returned=false ", int(id), userId).Row()
 	if row.Err() != nil {
 		return nil, row.Err()
 	}
@@ -42,14 +42,7 @@ func GetRequestedAll() ([]types.IssueWithDetails, []types.IssueWithDetails, erro
 		return nil, nil, fmt.Errorf("error connecting to Db: %w", err)
 	}
 	var requests []types.IssueWithDetails
-	query := `
-        SELECT i.id AS issueId, u.username,b.id AS bookId, b.title AS bookTitle,b.quantity,b.author, i.issue_date, i.expected_return_date, i.returnRequested ,i.issueRequested
-        FROM issue i
-        INNER JOIN user u ON u.id = i.user_id
-        INNER JOIN book b ON b.id = i.book_id
-        WHERE returnRequested = 1 or issueRequested = 1
-      `
-	rows, err := db.Query(query)
+	rows, err := db.Model(&types.Issue{}).Joins("Inner Join users on users.id=issues.user_id").Joins("Inner Join books on books.id=issues.book_id").Where("return_requested = 1 or issue_requested = 1").Select("issues.id", "users.username", "books.id", "books.title", "books.quantity", "books.author", "issues.issue_date", "issues.expected_return_date", "issues.return_requested", "issues.issue_requested").Rows()
 	if err != nil {
 		return nil, nil, fmt.Errorf("error querying admin request: %w", err)
 	}
@@ -97,12 +90,11 @@ func GetRequestedAll() ([]types.IssueWithDetails, []types.IssueWithDetails, erro
 
 func ExistingIssueCount(userId int) (int, error) {
 	var count int
-	query := `SELECT Count(*) FROM issue WHERE user_id = ? AND isReturned = FALSE`
 	db, err := config.DbConnection()
 	if err != nil {
 		return 0, fmt.Errorf("error connecting to Db: %w", err)
 	}
-	row := db.QueryRow(query, userId)
+	row := db.Model(&types.Issue{}).Where("user_id = ? AND is_returned = FALSE", userId).Select("Count(*)").Row()
 	err = row.Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("error connecting to Db: %w", err)
@@ -113,14 +105,16 @@ func ExistingIssueCount(userId int) (int, error) {
 	}
 	return count, nil
 }
+
 func AddNewIssue(userID int, bookId int) error {
-	query := `INSERT INTO issue (user_id, book_id ,issueRequested) VALUES (?,?,?);`
 	db, err := config.DbConnection()
 	if err != nil {
 		return fmt.Errorf("error connecting to Db: %w", err)
 	}
-	_, err = db.Exec(query, userID, bookId, true)
-	if err != nil {
+	tx := db.Model(&types.Issue{}).Create(&types.Issue{
+		User_id: int32(userID), Book_id: int32(bookId), IssueRequested: true,
+	})
+	if tx.Error != nil {
 		return err
 	}
 	err = config.CloseConnection(db)
@@ -130,24 +124,18 @@ func AddNewIssue(userID int, bookId int) error {
 	return nil
 }
 func ReturnRequest(userID int, bookId int) error {
-	query := `UPDATE issue
-        SET returnRequested = true
-        WHERE user_id = ? AND book_id = ? AND isReturned=0`
 	db, err := config.DbConnection()
 	if err != nil {
 		return fmt.Errorf("error connecting to Db: %w", err)
 	}
-	result, err := db.Exec(query, userID, bookId)
+	result := db.Model(&types.Issue{}).Where("user_id = ? AND book_id = ? AND isReturned=0", userID, bookId).Update("returnRequested", "true")
 	if err != nil {
 		return err
 	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
+	if result.Error != nil {
+		return result.Error
 	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("issue Not Found")
-	}
+
 	err = config.CloseConnection(db)
 	if err != nil {
 		return err
@@ -155,19 +143,13 @@ func ReturnRequest(userID int, bookId int) error {
 	return nil
 }
 func GetUserIssues(userId int) ([]types.IssueWithDetails, error) {
-	query := `
-        SELECT i.id AS issueId, i.book_id,i.issue_date, i.expected_return_date, b.title, b.author,i.isReturned,i.issueRequested,i.returnRequested
-        FROM user u
-        INNER JOIN issue i ON u.id = i.user_id
-        INNER JOIN book b ON i.book_id = b.id
-        WHERE u.id = ? ;
-      `
+
 	db, err := config.DbConnection()
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to Db: %w", err)
 	}
 	var requests []types.IssueWithDetails
-	rows, err := db.Query(query, userId)
+	rows, err := db.Model(&types.User{}).Joins("Inner Join issues on users.id=issues.user_id").Joins("Inner Join books on issues.book_id=books.id").Where("users.id=?", userId).Select("issues.id AS issueId", "issues.book_id", "issues.issue_date", "issues.expected_return_date", "books.title", "books.author", "issues.is_returned", "issues.issue_requested", "issues.return_requested").Rows()
 	if err != nil {
 		return nil, fmt.Errorf("error querying admin request: %w", err)
 	}
@@ -201,123 +183,123 @@ func GetUserIssues(userId int) ([]types.IssueWithDetails, error) {
 	}
 	err = config.CloseConnection(db)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-		return requests, nil
+	return requests, nil
 }
 
-func UpdateIssue(issueIds []string, updateType string) error {
-	now := time.Now()
-	nextDate := now.AddDate(0, 0, 14)
-	formattedTodayDate := now.Format("2006-01-02")
-	formattedReturnDate := nextDate.Format("2006-01-02")
-	var keyString string
-	for _, key := range issueIds {
-		keyString += key
-		keyString += ","
-	}
-	keyString = strings.Trim(keyString, ",")
-	var query string
-	if updateType == utils.ISSUED {
+// func UpdateIssue(issueIds []string, updateType string) error {
+// 	now := time.Now()
+// 	nextDate := now.AddDate(0, 0, 14)
+// 	formattedTodayDate := now.Format("2006-01-02")
+// 	formattedReturnDate := nextDate.Format("2006-01-02")
+// 	var keyString string
+// 	for _, key := range issueIds {
+// 		keyString += key
+// 		keyString += ","
+// 	}
+// 	keyString = strings.Trim(keyString, ",")
+// 	var query string
+// 	if updateType == utils.ISSUED {
 
-		query = fmt.Sprintf(` UPDATE issue SET issueRequested = FALSE, isReturned = FALSE ,issue_date='%s' , expected_return_date='%s' WHERE id IN (%s)`, formattedTodayDate, formattedReturnDate, keyString)
-	} else if updateType == utils.RETURNED {
-		query = fmt.Sprintf(` UPDATE issue SET returnRequested = FALSE, isReturned = TRUE ,returned_date ='%s' WHERE id IN (%s) `, formattedTodayDate, keyString)
-	}
-	db, err := config.DbConnection()
-	if err != nil {
-		return fmt.Errorf("error connecting to Db: %w", err)
-	}
-	result, err := db.Exec(query)
-	if err != nil {
-		return err
-	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("no Updation")
-	}
-	err = config.CloseConnection(db)
-	if err != nil {
-		return err
-	}
-		return nil
-}
+// 		query = fmt.Sprintf(` UPDATE issue SET issueRequested = FALSE, isReturned = FALSE ,issue_date='%s' , expected_return_date='%s' WHERE id IN (%s)`, formattedTodayDate, formattedReturnDate, keyString)
+// 	} else if updateType == utils.RETURNED {
+// 		query = fmt.Sprintf(` UPDATE issue SET returnRequested = FALSE, isReturned = TRUE ,returned_date ='%s' WHERE id IN (%s) `, formattedTodayDate, keyString)
+// 	}
+// 	db, err := config.DbConnection()
+// 	if err != nil {
+// 		return fmt.Errorf("error connecting to Db: %w", err)
+// 	}
+// 	result, err := db.Exec(query)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	rowsAffected, err := result.RowsAffected()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if rowsAffected == 0 {
+// 		return fmt.Errorf("no Updation")
+// 	}
+// 	err = config.CloseConnection(db)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
-func DenyIssueRequest(id int, denyType string) error {
-	var query string
-	if denyType == utils.ISSUED {
-		query = `DELETE FROM issue WHERE id= ?`
-	} else if denyType == utils.RETURNED {
-		query = ` UPDATE issue SET returnRequested = FALSE WHERE id = ?;`
-	}
-	db, err := config.DbConnection()
-	if err != nil {
-		return fmt.Errorf("error connecting to Db: %w", err)
-	}
-	result, err := db.Exec(query, id)
-	if err != nil {
-		return err
-	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("no Updation")
-	}
-	err = config.CloseConnection(db)
-	if err != nil {
-		return err
-	}
-		return nil
+// func DenyIssueRequest(id int, denyType string) error {
+// 	var query string
+// 	if denyType == utils.ISSUED {
+// 		query = `DELETE FROM issue WHERE id= ?`
+// 	} else if denyType == utils.RETURNED {
+// 		query = ` UPDATE issue SET returnRequested = FALSE WHERE id = ?;`
+// 	}
+// 	db, err := config.DbConnection()
+// 	if err != nil {
+// 		return fmt.Errorf("error connecting to Db: %w", err)
+// 	}
+// 	result, err := db.Exec(query, id)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	rowsAffected, err := result.RowsAffected()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if rowsAffected == 0 {
+// 		return fmt.Errorf("no Updation")
+// 	}
+// 	err = config.CloseConnection(db)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
 
-}
+// }
 
-func BalanceIssues(userIds []string) error {
-	var issues []types.IssueWithDetails
-	for _, value := range userIds {
-		id, err := strconv.ParseInt(value, 10, 64)
-		if err != nil {
-			return fmt.Errorf("error parsing to int")
-		}
-		userIssues, err := GetUserIssues(int(id))
-		if err != nil {
-			fmt.Println(err.Error())
-			return err
-		}
-		issues = append(issues, userIssues...)
-	}
-	var issueIds []string
-	var selectedBooks = map[string]int{}
-	for _, value := range issues {
-		if value.Issue.IssueRequested {
-			err := DenyIssueRequest(value.Issue.Id, utils.ISSUED)
-			if err != nil {
+// func BalanceIssues(userIds []string) error {
+// 	var issues []types.IssueWithDetails
+// 	for _, value := range userIds {
+// 		id, err := strconv.ParseInt(value, 10, 64)
+// 		if err != nil {
+// 			return fmt.Errorf("error parsing to int")
+// 		}
+// 		userIssues, err := GetUserIssues(int(id))
+// 		if err != nil {
+// 			fmt.Println(err.Error())
+// 			return err
+// 		}
+// 		issues = append(issues, userIssues...)
+// 	}
+// 	var issueIds []string
+// 	var selectedBooks = map[string]int{}
+// 	for _, value := range issues {
+// 		if value.Issue.IssueRequested {
+// 			err := DenyIssueRequest(value.Issue.Id, utils.ISSUED)
+// 			if err != nil {
 
-				fmt.Println(err.Error())
-				return err
-			}
-		} else if !value.Issue.IsReturned && !value.Issue.IssueRequested {
-			issueIds = append(issueIds, strconv.Itoa(value.Issue.Id))
-			selectedBooks[strconv.Itoa(int(value.Issue.Book_id))] += 1
-		}
-	}
-	payload := types.RequestPayload{
-		IssueIds:      issueIds,
-		SelectedBooks: selectedBooks,
-	}
-	err := UpdatebooksQuantity(&payload, true)
-	if err != nil {
-		fmt.Println(err.Error())
-		return err
-	}
-	err = UpdateIssue(issueIds, utils.RETURNED)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	return nil
-}
+// 				fmt.Println(err.Error())
+// 				return err
+// 			}
+// 		} else if !value.Issue.IsReturned && !value.Issue.IssueRequested {
+// 			issueIds = append(issueIds, strconv.Itoa(value.Issue.Id))
+// 			selectedBooks[strconv.Itoa(int(value.Issue.Book_id))] += 1
+// 		}
+// 	}
+// 	payload := types.RequestPayload{
+// 		IssueIds:      issueIds,
+// 		SelectedBooks: selectedBooks,
+// 	}
+// 	err := UpdatebooksQuantity(&payload, true)
+// 	if err != nil {
+// 		fmt.Println(err.Error())
+// 		return err
+// 	}
+// 	err = UpdateIssue(issueIds, utils.RETURNED)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return err
+// 	}
+// 	return nil
+// }
