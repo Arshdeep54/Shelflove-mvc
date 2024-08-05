@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shelflove</title>
-    <link type="text/css" href="/static/style.css" rel="stylesheet" />
+    <link
+      type="text/css"
+      href="https://cdn.jsdelivr.net/gh/Arshdeep54/CDN/style.css"
+      rel="stylesheet"
+    />
   </head>
 
   <body>
@@ -386,206 +390,14 @@
       </div>
     </dialog>
     {{ if gt (len .RequestedReturns) 0 }}
-    <script>
-      const returnCheckboxes = document.querySelectorAll(".return-checkbox");
-      const selectedIssueIds = [];
-      let selectedReturnbooks = {};
-
-      returnCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", (event) => {
-          if (event.target.checked) {
-            selectedIssueIds.push(event.target.dataset.issueId);
-
-            if (!selectedReturnbooks[event.target.dataset.bookId]) {
-              selectedReturnbooks[event.target.dataset.bookId] = 1;
-            } else {
-              selectedReturnbooks[event.target.dataset.bookId]++;
-            }
-          } else {
-            const index = selectedIssueIds.indexOf(
-              event.target.dataset.issueId
-            );
-            if (index > -1) {
-              selectedIssueIds.splice(index, 1);
-            }
-            selectedReturnbooks[event.target.dataset.bookId]--;
-          }
-        });
-      });
-
-      const submitButton = document.getElementsByClassName("approve-btn");
-      submitButton[0].addEventListener("click", (event) => {
-        event.preventDefault();
-        if (selectedIssueIds.length === 0) {
-          alert("Please select at least one checkbox");
-          return;
-        }
-
-        const requestBody = JSON.stringify({
-          issueIds: selectedIssueIds,
-          selectedBooks: selectedReturnbooks,
-        });
-        console.log(requestBody);
-        fetch("/api/admin/approvereturns", {
-          method: "POST",
-          body: requestBody,
-          headers: { "Content-Type": "application/json" },
-        }).then((response) => {
-          selectedIssueIds.length = 0;
-          selectedReturnbooks = {};
-          location.reload();
-        });
-      });
-    </script>
+    <script src="/static/scripts/returnCheckbox.js"></script>
     {{ end}} {{ if gt (len .RequestedIssues) 0 }}
-    <script>
-      const issueCheckboxes = document.querySelectorAll(".issue-checkbox");
-      const selectedIssueReqIds = [];
-      let selectedIssuebooks = {};
-
-      issueCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", (event) => {
-          if (event.target.checked) {
-            console.log("checked");
-            let bookQuantity = event.target.dataset.bookQuantity;
-            if (
-              !selectedIssuebooks[event.target.dataset.bookId] &&
-              bookQuantity > 0
-            ) {
-              console.log("can issue");
-              selectedIssueReqIds.push(event.target.dataset.issueId);
-              selectedIssuebooks[event.target.dataset.bookId] = 1;
-              console.log(selectedIssueReqIds, selectedIssuebooks);
-            } else {
-              if (
-                bookQuantity > selectedIssuebooks[event.target.dataset.bookId]
-              ) {
-                selectedIssueReqIds.push(event.target.dataset.issueId);
-                selectedIssuebooks[event.target.dataset.bookId]++;
-              } else {
-                alert("Not enough books");
-                event.target.checked = false;
-              }
-            }
-          } else {
-            const index = selectedIssueReqIds.indexOf(
-              event.target.dataset.issueId
-            );
-            if (index > -1) {
-              selectedIssueReqIds.splice(index, 1);
-            }
-            selectedIssuebooks[event.target.dataset.bookId]--;
-          }
-        });
-      });
-      const submitIssueButton =
-        document.getElementsByClassName("approve-issue-btn");
-      submitIssueButton[0].addEventListener("click", (event) => {
-        event.preventDefault();
-        if (selectedIssueReqIds.length === 0) {
-          alert("Please select at least one checkbox");
-          return;
-        }
-        const requestBody = JSON.stringify({
-          issueIds: selectedIssueReqIds,
-          selectedBooks: selectedIssuebooks,
-        });
-
-        console.log(requestBody);
-        fetch("/api/admin/approveissues/", {
-          method: "POST",
-          body: requestBody,
-          headers: { "Content-Type": "application/json" },
-        }).then((response) => {
-          selectedIssueReqIds.length = 0;
-          selectedIssuebooks = {};
-          location.reload();
-        });
-      });
-    </script>
+    <script src="/static/scripts/issueCheckbox.js"></script>
     {{end}} {{ if gt (len .RequestedAdmins) 0 }}
-    <script>
-      const adminCheckboxes = document.querySelectorAll(".admin-checkbox");
-      const selectedUserIds = [];
-
-      adminCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", (event) => {
-          if (event.target.checked) {
-            selectedUserIds.push(event.target.dataset.userId);
-          } else {
-            const index = selectedUserIds.indexOf(event.target.dataset.userId);
-            if (index > -1) {
-              selectedUserIds.splice(index, 1);
-            }
-          }
-        });
-      });
-      const submitAdminButton =
-        document.getElementsByClassName("approve-admin-btn");
-
-      submitAdminButton[0].addEventListener("click", (event) => {
-        event.preventDefault();
-        if (selectedUserIds.length === 0) {
-          alert("Please select at least one checkbox");
-          return;
-        }
-
-        const requestBody = JSON.stringify({ ids: selectedUserIds });
-        console.log(requestBody);
-
-        fetch("/api/admin/approveadmin/", {
-          method: "POST",
-          body: requestBody,
-          headers: { "Content-Type": "application/json" },
-        }).then((response) => {
-          selectedUserIds.length = 0;
-          location.reload();
-        });
-      });
-    </script>
+    <script src="/static/scripts/adminRequest.js"></script>
     {{ end }}
 
-    <script>
-      const logoutButton = document.getElementById("logout");
-      logoutButton.addEventListener("click", async () => {
-        try {
-          const response = await fetch("/api/auth/logout", {
-            method: "GET",
-          });
-          const data = await response.json();
-          if (data.message === "Successfully logged out") {
-            window.location.href = "/login";
-          } else {
-            error(data.message);
-          }
-        } catch (error) {
-          alert(error);
-        }
-      });
-    </script>
-    <script>
-      const numberInput = document.getElementById("positiveQuantityInput");
-      const errorQuant = document.getElementById("errorQuant");
-
-      numberInput.addEventListener("keypress", function (event) {
-        if (event.key === "Backspace" || event.key === "Delete") {
-          errorQuant.innerHTML = " ";
-          return;
-        }
-
-        const isNumber = !isNaN(event.key) && event.key !== ".";
-
-        if (!isNumber) {
-          event.preventDefault();
-          errorQuant.innerHTML = `Can't add negative or decimal number`;
-        } else if (
-          event.key === "Backspace" ||
-          event.key === "Delete" ||
-          isNumber
-        ) {
-          errorQuant.innerHTML = " ";
-        }
-      });
-    </script>
+    <script src="/static/scripts/logout.js"></script>
+    <script src="/static/scripts/quantityInput.js"></script>
   </body>
 </html>

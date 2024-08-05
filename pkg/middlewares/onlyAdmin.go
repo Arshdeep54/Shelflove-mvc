@@ -13,7 +13,9 @@ func OnlyAdmin(next http.HandlerFunc) http.HandlerFunc {
 			return
 		} else {
 			controllers.ErrorData.Message = "You are not the admin "
+
 			http.Redirect(w, r, "/error", http.StatusSeeOther)
+
 			return
 		}
 	}

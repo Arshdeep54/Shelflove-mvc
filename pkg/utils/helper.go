@@ -13,19 +13,21 @@ func ParseBook(book *types.Book, r *http.Request) error {
 	book.Description = r.FormValue("description")
 	book.PublicationDate = r.FormValue("publication_date")
 	book.Genre = r.FormValue("genre")
+
 	rating, err := strconv.ParseFloat(r.FormValue("rating"), 64)
 	if err != nil {
 		return err
 	}
+
 	book.Rating = float32(rating)
+
 	quantity, err := strconv.ParseInt(r.FormValue("quantity"), 10, 64)
 	if err != nil {
 		return err
 	}
+
 	book.Quantity = int32(quantity)
 	book.Address = r.FormValue("address")
+
 	return nil
 }
-
-
-

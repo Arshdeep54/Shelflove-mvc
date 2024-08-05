@@ -15,9 +15,10 @@ func Authenticate(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		jwtToken, err := r.Cookie("jwtToken")
 		if err != nil {
-			writeHeaders(w, r, next, 0,  false, "", "")
+			writeHeaders(w, r, next, 0, false, "", "")
 			return
 		}
+
 		token, err := utils.ValidateJWT(jwtToken.Value)
 		if err != nil {
 			writeHeaders(w, r, next, 0, false, "", "")
@@ -33,25 +34,29 @@ func Authenticate(next http.HandlerFunc) http.HandlerFunc {
 		str := claims["user"].(string)
 
 		var payload types.JwtPayload
+
 		err = json.Unmarshal([]byte(str), &payload)
 		if err != nil {
 			writeHeaders(w, r, next, 0, false, "", "")
 			return
 		}
-		writeHeaders(w, r, next, int(payload.Id) ,true, payload.Username, payload.Email)
+
+		writeHeaders(w, r, next, int(payload.Id), true, payload.Username, payload.Email)
 	}
 }
 
-func writeHeaders(w http.ResponseWriter, r *http.Request, next http.HandlerFunc, userId int, IsLoggedIn bool, username string, email string) {
-	isAdmin,err:=models.IsAdmin(userId)
-	if err!=nil {
-		isAdmin=false
+func writeHeaders(w http.ResponseWriter, r *http.Request, next http.HandlerFunc, userId int, isLoggedIn bool, username string, email string) {
+	isAdmin, err := models.IsAdmin(userId)
+	if err != nil {
+		isAdmin = false
 	}
+
 	controllers.Data.IsAdmin = isAdmin
 	controllers.Data.UserId = userId
-	controllers.Data.IsLoggedIn = IsLoggedIn
+	controllers.Data.IsLoggedIn = isLoggedIn
 	controllers.Data.Username = username
 	controllers.Data.Email = email
 	controllers.Data.UserId = userId
+
 	next(w, r)
 }

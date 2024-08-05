@@ -7,8 +7,6 @@ import (
 )
 
 func main() {
-
 	fmt.Println("Starting Server...")
 	api.Start()
-
 }

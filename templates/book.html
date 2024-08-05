@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shelflove</title>
-    <link type="text/css" href="/static/style.css" rel="stylesheet" />
+    <link
+      type="text/css"
+      href="https://cdn.jsdelivr.net/gh/Arshdeep54/CDN/style.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
     {{ template "navbar" . }}
@@ -270,46 +274,8 @@
     </div>
     {{ end }} {{ end }}
 
-    <script>
-      const deleteBookButton = document.getElementById("deletebook");
-      const deletebookForm = document.getElementById("deletebookForm");
-      deleteBookButton.addEventListener("click", () => {
-        deletebookForm.submit();
-      });
-    </script>
-    <script>
-      const today = new Date().toISOString().slice(0, 10);
-      document.getElementById("publication_date").value = today;
-      const updateBookButton = document.getElementById("updatebook");
-      const updatebookForm = document.getElementById("updatebookForm");
+    <script src="/static/scripts/bookUpdates.js"></script>
 
-      updateBookButton.addEventListener("click", () => {
-        updatebookForm.submit();
-      });
-    </script>
-    <script>
-      const numberInput = document.getElementById("positiveQuantityInput");
-      const errorQuant = document.getElementById("errorQuant");
-
-      numberInput.addEventListener("keypress", function (event) {
-        if (event.key === "Backspace" || event.key === "Delete") {
-          errorQuant.innerHTML = " ";
-          return;
-        }
-
-        const isNumber = !isNaN(event.key) && event.key !== ".";
-
-        if (!isNumber) {
-          event.preventDefault();
-          errorQuant.innerHTML = `Can't add negative or decimal number`;
-        } else if (
-          event.key === "Backspace" ||
-          event.key === "Delete" ||
-          isNumber
-        ) {
-          errorQuant.innerHTML = " ";
-        }
-      });
-    </script>
+    <script src="/static/scripts/quantityInput.js"></script>
   </body>
 </html>

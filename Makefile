@@ -38,8 +38,7 @@ cleandb:
 
 lint:
 	@echo "Linting ..."
-	@$(GOLANGCI_LINT) run
-	
+	@$(GOLANGCI_LINT) run --fix
 test:
 	@echo "Testing"
 	@go test ${TEST_FOLDER} -v

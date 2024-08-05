@@ -1,6 +1,7 @@
-package tests
+package tests_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/Arshdeep54/Shelflove-mvc/pkg/utils"
@@ -23,7 +24,7 @@ var hashPayloads = []HashData{
 	},
 	{
 		password: "",
-		err: nil,
+		err:      nil,
 	},
 }
 
@@ -31,10 +32,9 @@ func TestHashPassword(t *testing.T) {
 	for _, value := range hashPayloads {
 		_, err := utils.HashedPassword(value.password)
 		if err != nil {
-			if err != value.err {
+			if !errors.Is(err, value.err) {
 				t.Fatal(err.Error(), value.err)
 			}
 		}
-
 	}
 }
