@@ -31,3 +31,19 @@ func ParseBook(book *types.Book, r *http.Request) error {
 
 	return nil
 }
+
+func IssueStatus(request types.IssueWithDetails) string {
+	switch {
+	case !request.Issue.IssueRequested && !request.Issue.IsReturned && !request.Issue.ReturnRequested:
+		return "Issued"
+	case request.Issue.IssueRequested:
+		return "Issue Requested"
+	case request.Issue.ReturnRequested:
+		return "Return Requested"
+	case request.Issue.IsReturned:
+		return "Returned"
+
+	default:
+		return " "
+	}
+}

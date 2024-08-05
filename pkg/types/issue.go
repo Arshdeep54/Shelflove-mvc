@@ -30,6 +30,7 @@ type IssueRender struct {
 type IssueWithDetails struct {
 	Issue    IssueRender
 	Book     Book
+	Status   string
 	IsIssued bool
 	Username string
 }

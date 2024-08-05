@@ -86,6 +86,7 @@ func GetRequestedAll() ([]types.IssueWithDetails, []types.IssueWithDetails, erro
 		}
 
 		request.IsIssued = !request.Issue.IssueRequested
+		request.Status = utils.IssueStatus(request)
 		requests = append(
 			requests, request)
 	}
@@ -224,6 +225,7 @@ func GetUserIssues(userId int) ([]types.IssueWithDetails, error) {
 			request.Issue.Issue_date = issue.Format(utils.LAYOUT)
 		}
 
+		request.Status = utils.IssueStatus(request)
 		requests = append(
 			requests, request)
 	}

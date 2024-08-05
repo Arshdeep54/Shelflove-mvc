@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shelflove</title>
     <link
-    type="text/css"
-    href="https://cdn.jsdelivr.net/gh/Arshdeep54/CDN/style.css"
-    rel="stylesheet"
-  />  </head>
+      type="text/css"
+      href="https://cdn.jsdelivr.net/gh/Arshdeep54/CDN/style.css"
+      rel="stylesheet"
+    />
+  </head>
   <body>
     {{ template "navbar" . }}
     <div class="mx-5 my-5">
@@ -32,10 +33,7 @@
                 <th>Author</th>
                 <th>Issued Date</th>
                 <th>Return Date</th>
-                <th>Issued</th>
-                <th>Returned</th>
-                <th>Issue Requested</th>
-                <th>Return Requested</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -77,10 +75,7 @@
                 <td>{{ .Book.Author }}</td>
                 <td>{{ .Issue.Issue_date }}</td>
                 <td>{{ .Issue.Expected_return_date }}</td>
-                <td>{{ .IsIssued }}</td>
-                <td>{{ .Issue.IsReturned }}</td>
-                <td>{{ .Issue.IssueRequested }}</td>
-                <td>{{ .Issue.ReturnRequested }}</td>
+                <td>{{ .Status }}</td>
               </tr>
 
               {{end }}
