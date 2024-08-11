@@ -116,7 +116,7 @@ func ApproveReturns(w http.ResponseWriter, r *http.Request) {
 
 func ApproveAdmin(w http.ResponseWriter, r *http.Request) {
 	type adminrequest struct {
-		Ids []string `json:"ids"`
+		Ids []string
 	}
 
 	var request adminrequest

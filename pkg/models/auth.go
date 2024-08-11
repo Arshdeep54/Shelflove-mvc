@@ -190,7 +190,7 @@ func ApproveAdmin(userIds []string) error {
 	}
 
 	keyString = strings.Trim(keyString, ",")
-	query := `UPDATE user SET adminRequest = FALSE, isAdmin = TRUE WHERE id IN (%s)`
+	query := `UPDATE user SET adminRequest = FALSE, isAdmin = TRUE WHERE id IN (?)`
 
 	db, err := config.DbConnection()
 	if err != nil {

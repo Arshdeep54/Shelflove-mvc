@@ -232,7 +232,6 @@ func UpdatebooksQuantity(payload *types.RequestPayload, increase bool) error {
 
 	keyString = strings.Trim(keyString, ",")
 	query += fmt.Sprintf(` ELSE (quantity) END ) WHERE id IN (%s)`, keyString)
-
 	db, err := config.DbConnection()
 	if err != nil {
 		return fmt.Errorf("error connecting to Db: %w", err)

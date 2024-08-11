@@ -332,6 +332,10 @@ func BalanceIssues(userIds []string) error {
 		issues = append(issues, userIssues...)
 	}
 
+	if len(issues) == 0 {
+		return nil
+	}
+
 	var issueIds []string
 
 	selectedBooks := map[string]int{}

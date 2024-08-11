@@ -199,8 +199,6 @@ func signupRedirect(w http.ResponseWriter, r *http.Request, err error, redirectU
 		return nil
 	} else {
 		ErrorMessage = ""
-
-		fmt.Println("Returning 5")
 	}
 
 	return fmt.Errorf("no Error to Redirect")

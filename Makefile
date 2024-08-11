@@ -65,6 +65,11 @@ build:
 	@$(GO) build -o $(BUILD_OUTPUT) $(BUILD_INPUT)
 	@echo "Built as $(BUILD_OUTPUT)"
 
+setup:
+	@echo "Setting up..."
+	@chmod +x ./setup.sh
+	@bash setup.sh 
+
 dev:
 	@echo "Starting development server..."
 	@$(AIR)

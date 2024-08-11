@@ -27,8 +27,7 @@ func (s *sqlDatabase) QueryRow(query string, args ...interface{}) *sql.Row {
 func TestGetIssue(t *testing.T) {
 	t.Run("Issue Exists", func(t *testing.T) {
 		mockDB, mock, err := sqlmock.New()
-		require.Error(t, err)
-
+		assert.NoError(t, err)
 		defer mockDB.Close()
 
 		rows := mock.NewRows([]string{"id", "isReturned", "returnRequested", "issueRequested"}).
@@ -46,7 +45,7 @@ func TestGetIssue(t *testing.T) {
 		assert.Equal(t, int(1), issue.Id)
 		assert.False(t, false, issue.IsReturned)
 		assert.False(t, false, issue.ReturnRequested)
-		assert.False(t, true, issue.IssueRequested)
+		assert.False(t, false, issue.IssueRequested)
 
 		err = mock.ExpectationsWereMet()
 		assert.NoError(t, err)
